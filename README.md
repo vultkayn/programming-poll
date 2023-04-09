@@ -10,8 +10,19 @@ This template is compatible with [Auto DevOps](https://docs.gitlab.com/ee/topics
 
 If Auto DevOps is not already enabled for this project, you can [turn it on](https://docs.gitlab.com/ee/topics/autodevops/#enabling-auto-devops) in the project settings.
 
-### Developing with Gitpod
 
-This template has a fully-automated dev setup for [Gitpod](https://docs.gitlab.com/ee/integration/gitpod.html).
+## Still looking for a good project idea
 
-If you open this project in Gitpod, you'll get all Node dependencies pre-installed and Express will open a web preview.
+
+
+## Technologies
+
+- **Node** and **Express**, using **Typescript** for server-side
+- I don't know yet about database system used. I only have practical experience with Oracle DB and Mysql, I'd like to learn a more modern tech here.
+(PostgreSql or MongoDb depending on schema ? What are Firebase and Apollo ?)
+- For front-end, probably Next.js or React, I don't have any experience with these kind of frameworks yet but they sound interesting.
+
+Add CI/CD toolchain within a Docker container for easy deployment.
+
+- Is there any verification tool I could use ? what of Jenkins ?
+
