@@ -1,0 +1,30 @@
+{
+  "name": "bta-poll-server",
+  "version": "0.0.1",
+  "author": "Benjamin Priour",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www",
+    "test": "jest",
+    "devstart": "nodemon ./bin/www",
+    "serverstart": "DEBUG=bta-poll-server:* npm run devstart"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.3",
+    "express": "^4.18.2",
+    "http-errors": "^1.6.2",
+    "morgan": "^1.9.0",
+    "typescript": "^4.9.4",
+    "mongoose": "^6.8.1",
+    "mongoose-type-email": "^1.1.2"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "supertest": "^3.0.0",
+    "debug": "^4.3.4",
+    "lint": "eslint src/js"
+  },
+  "engines": {
+    "node": "^18.16.0"
+  }
+}

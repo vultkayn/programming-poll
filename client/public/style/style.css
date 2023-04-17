@@ -1,0 +1,125 @@
+html, body {
+    font-size:medium;
+    box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    display: grid;
+    grid-template-areas: 
+        "header header"
+        "sidebar main";
+    grid-template-columns: 2fr 8fr;
+    gap: 30px;
+    font-family: 'Fira Code', 'Droid Sans Mono', monospace;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+a:hover, a:active {
+    color: teal;
+}
+
+main {
+    grid-area: "main";
+}
+
+#top-nav {
+    grid-area: "header";
+}
+
+#sidebar {
+    grid-area: "sidebar";
+    min-height: 100%;
+    padding-top: 10%;
+    padding-left: 80px;
+}
+#sidebar:hover {
+    border-right: 2px solid rgb(192, 191, 191);
+}
+
+#sidebar-heading {
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#sidebar > ul {
+    list-style-type: none;
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+#sidebar li {
+    margin-top: 5px;
+    margin-left: 15px;
+    font-size: 1rem;
+    font-weight: normal;
+}
+
+.row {
+    display:flex;
+    flex-direction: row;
+}
+.centered {
+    justify-content: center;
+}
+.x-centered {
+    align-items: center;
+}
+
+
+form {
+    width: 100%;
+    max-width: 1000px;
+}
+
+fieldset {
+    display: block;
+    border: 2px solid rgb(192, 191, 191);
+    padding: 20px;
+    margin: 40px 0;
+}
+
+fieldset > legend {
+    font-size: 1.2em;
+    text-align: center;
+    color: rgb(17, 17, 17);
+    background-color: none;
+    border: 2px solid rgb(192, 191, 191);
+    padding: 4px 6px;
+}
+
+
+
+
+.btn:hover {
+    cursor: pointer;
+    filter: brightness(1.1);
+}
+.btn {
+    cursor: pointer;
+}
+
+
+.validation-btn {
+    justify-content: flex-end;
+}
+
+.form-btn {
+    background-color:darkseagreen;
+    border: none;
+    padding: 8px 18px;
+    font-size: 1.3em;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    margin-right: 10px;
+}

@@ -1,13 +1,19 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var apiRouter = require('./api');
 
 var app = express();
+
+const mongoose = require("mongoose");
+// connect database
+const mongoDB = "mongodb+srv://vultkayn:KwtfvvGVp0uuvXOy@cluster0.iklopuz.mongodb.net/prog_feedback?retryWrites=true&w=majority";
+mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedTopology: true});
+const db = mongoose.connection;
+db.on("error", console.error.bind(console, "MongoDB connection error: "));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -19,8 +25,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/api', indexRouter);
+app.use('*', usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

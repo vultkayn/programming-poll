@@ -1,0 +1,50 @@
+.question-cardholder {
+    margin-bottom: 30px;
+    display:flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.question-cardholder pre {
+    min-width: 40%;
+    margin: 6px;
+}
+
+
+.answer-cardholder {
+    width: 100%;
+    max-width: 600px;
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 50px;
+    gap: 10px 15px;
+}
+
+
+.answer-wrapper {
+    text-align: center;
+}
+
+.answer-wrapper input[type="radio"] {
+    display: none;
+}
+
+.choice-label {
+    font-size: 1.2em;
+    background-color: teal;
+    border: 1px solid;
+    color: white;
+    border-radius: 5px;
+    width:100%;
+    padding-top: 10px;
+}
+
+.choice-input:checked + label {
+    background-color: rgb(54, 170, 170);
+}
+
+.choice-input:hover:not(:checked) + label {
+    box-shadow: 3px 5px rgb(1, 87, 87);
+    cursor:pointer;
+}
