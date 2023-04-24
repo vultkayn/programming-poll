@@ -3,7 +3,7 @@
 All following URI are to be prefixed by `/api` to be accessed from the client.
 Any request from the end-user to an URI prefixed by `/api` is to be handled by the server, while any other are to be processed by the client.
 
-
+*Authentification is no longer ensured by JWT but by a session*
 
 ## `/users` 
 
@@ -40,7 +40,6 @@ Concerned user must be authentified or it fails. `JWT` authentification here.
 ```json
 {
     "univID": string,
-    "auth": string
 }
 ```
 
@@ -58,7 +57,6 @@ yyy http code if any other failure
 
 ```json
 ?univID: string | null
-&auth: string
 ```
 **RESPONSE**
 
@@ -77,7 +75,6 @@ yyy http code if any other failure
 ```json
 {
     "univID": string,
-    "auth": string
 }
 ```
 
@@ -89,17 +86,18 @@ yyy http code if any other failure
 
 ```json
 {
-    "univID" | "email" : string | email,
+    "univID" : string,
     "password": string
 }
 ```
 
 **RESPONSE**
 
+Create session
+
 ```json
 {
     "univID": string,
-    "auth": string
 }
 ```
 

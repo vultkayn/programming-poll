@@ -1,9 +1,11 @@
 var router = require('express').Router();
 
-router.post('/', (req, res, next) => {
-    res.json('Connection to user');
-    // if user already exists (conflict of email or univID)
-    // res.status(409).send()
+const {connexion} = require ('../controllers/usersController');
+
+router.post('/', connexion, (req, res, next) => {
+    
+    const token = generateAccessToken({username: req.body.univID});
+    res.json({univId: req.body.univID, auth: token}); 
 });
 
 

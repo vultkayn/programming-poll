@@ -6,8 +6,8 @@ router.get('/', function(req, res, next) {
   res.render('api entry point', { title: 'Express' });
 });
 
-router.get('/users', require('./users'));
-router.get('/connect', require('./connect'));
-router.get('/exercises', require('./exercises'));
+router.use('/users', require('./users'));
+router.use('/connect', require('./connect'));
+router.use('/exercises', require('./exercises'));
 
 module.exports = router;

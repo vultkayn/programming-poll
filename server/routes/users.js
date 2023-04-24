@@ -1,13 +1,16 @@
 var router = require('express').Router();
-const { validate, EAUTH } = require('../authenticate'); 
+const { validate, EAUTH } = require('../authenticate');
 
-router.post('/', (req, res, next) => {
+const {signup} = require('../controllers/usersController');
+
+
+router.post('/', signup, (req, res, next) => {
     res.send('Creation of an user');
     // if user already exists (conflict of email or univID)
     // res.status(409).send()
 });
 
-router.get('/', (req, res, next) => {
+router.get('/:id', (req, res, next) => {
   if (validate(req.body) === false)
     // if authentification failed.
     res.status(403).json('authentification failed');
