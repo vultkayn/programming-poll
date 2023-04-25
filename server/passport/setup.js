@@ -39,7 +39,7 @@ async function signup(req, univID, password) {
             return newUser
                 .save()
                 .then(user => {return {user}})
-                .catch(err => {return {user: false, err: {message: err}}});
+                .catch(err => {return {user: false, err}});
         })
         .catch(err => {user: false, err});
 }
@@ -55,19 +55,19 @@ passport.use('login', new LocalStrategy({
             .then( user => {
                 // no such user, create it.
                 if (!user) {
-                    return done(null, false, {message: "User not found"});
+                    return done(null, false, {status: 400, message: "User not found"});
                 } else {
                     // user was found
                     return bcrypt.compare(password, user.identity.password)
                     .then(res => {
                         if (res) // success
                             return done(null, user);
-                        return done(null, false, {message: "Wrong Password"});
+                        return done(null, false, {status: 400, message: "Wrong password"});
                     })
                 }
             })
             .catch(err => {
-                return done(null, false, {message: err});
+                return done(null, false, err);
             })
     })
 );
@@ -85,17 +85,17 @@ passport.use('signup',
                 if (!user) {
                     signup(req, id, password)
                         .then ( ({user, err}) => {
-                            if (err !== undefined)
-                                return done(null, false, {message: err});
+                            if (err)
+                                return done(null, false, err);
                             return done(null, user);
                         });
                 } else {
                     // user was found
-                    return done(null, user, {message: "User exists already"});
+                    return done(null, user, {status: 400, message: "User exists already"});
                 }
             })
             .catch(err => {
-                return done(null, false, {message: err});
+                return done(null, false, err);
             })
     })
 );

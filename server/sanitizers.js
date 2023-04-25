@@ -7,6 +7,7 @@ exports.validateSanitization = (req, res, next) => {
     {
         errors = {
             errors: errors.mapped(),
+            message: "Invalid fields",
             status: 400
         }
         next(errors);
