@@ -1,34 +1,33 @@
 var router = require('express').Router();
-const { validate, EAUTH } = require('../authenticate');
 
-const {signup} = require('../controllers/usersController');
+const {loggedIn} = require('../passport/authenticate');
+const {param} = require('express-validator');
+const {validateSanitization} = require('../sanitizers');
+const User = require('../models/userModel');
 
+// router.post('/', signup);
 
-router.post('/', signup, (req, res, next) => {
-    res.send('Creation of an user');
-    // if user already exists (conflict of email or univID)
-    // res.status(409).send()
-});
+router.get('/:univID',
+  param('univID').escape(),
+  validateSanitization,
+  loggedIn,
+  (req, res, next) => {
+    // TODO add test for deleted identity
+    User.findById(req.user.id)
+      .then((user) => {        
+        res.json({
+            promo: user.promo,
+            identity: user.identity
+        });
+      })
 
-router.get('/:id', (req, res, next) => {
-  if (validate(req.body) === false)
-    // if authentification failed.
-    res.status(403).json('authentification failed');
-
-  res.json({
-      "firstName": "toto",
-      "lastName": "titi",
-      "univID": "benpr438",
-      "promo": 2024,
-      "email": "benpr438@student.liu.se"
-  });
-  // if requested user was not found
-  // res.status(404).json('user not found');
+    // if requested user was not found
+    // res.status(404).json('user not found');
 });
 
 router.put('/', (req, res, next) => {
-  if (validate(req.body, EAUTH.userRW) === false)
-    res.status(403).json('Insufficient permissions.');
+  // if (validate(req.body, EAUTH.userRW) === false)
+    // res.status(403).json('Insufficient permissions.');
 });
 
 

@@ -3,12 +3,12 @@
   "version": "0.0.1",
   "author": "Benjamin Priour",
   "private": true,
-  "bin": {"www":"./bin/www.js"},
   "scripts": {
-    "start": "node ./bin/www",
-    "test": "jest",
-    "devstart": "nodemon ./bin/www",
-    "serverstart": "DEBUG=bta-poll-server:* npm run devstart"
+    "deploy": "NODE_ENV=production node ./bin/www", 
+    "start": "NODE_ENV=development node ./bin/www",
+    "test": "NODE_ENV=test jest",
+    "devstart": "NODE_ENV=development nodemon ./bin/www",
+    "serverstart": "NODE_ENV=development DEBUG=bta-poll-server:* npm run devstart"
   },
   "dependencies": {
     "express": "^4.18.2",
