@@ -1,9 +1,6 @@
-const Student = require("../models/studentModel");
+const {query} = require('express-validator');
 
 
-exports.index = (req, res) => {
-    res.render("index", {title: "Student Home page"});
-}
 
 exports.list = (req, res) => {
     res.send("NOT IMPLEMENTED: student list.");
@@ -17,9 +14,10 @@ exports.create_post = (req, res) => {
     res.send("NOT IMPLEMENTED: student create POST");
 }
 
-exports.create_get = (req, res) => {
-    res.send("NOT IMPLEMENTED: student create GET");
-}
+exports.create_get = [
+    query("auth").notEmpty().isJWT()
+
+];
 
 
 exports.delete_post = (req, res) => {
