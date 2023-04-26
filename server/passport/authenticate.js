@@ -1,7 +1,8 @@
-const {body, param} = require('express-validator');
+const {body} = require('express-validator');
 
 const passport = require("passport");
 const {validateSanitization} = require('../sanitizers');
+const User = require('../models/userModel');
 
 const passportCall = (name) => (req, res, next) => {
     return passport.authenticate(name, function(err, user, info) {
@@ -46,3 +47,24 @@ exports.loggedIn = function (req, res, next) {
     if (req.user) next();
     else res.redirect('/login');
 };
+
+// done is a callback that should be provided, function(err: Any, hasAccess: boolean, info?: Any)
+// required is a bit field of required access rights.
+exports.hasAccess = (required, user, done) => {
+    if (!user)
+        return done(null, false, {message: "User not logged in"});
+    User.findById(user.id)
+        .then(user => {
+            if (!user || !user.auth)
+               return done(null, false, {message: "User not found"});
+            if (user.auth & required !== required)
+                return done(null, false, {message: "Unsufficient permission"})
+            return done(null, true)
+        });
+}
+
+exports.ACCESS = Object.freeze({
+    R: 1,
+    W: 2,
+    X: 4
+});
