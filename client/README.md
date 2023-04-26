@@ -2,13 +2,18 @@
 
 Register page:
     
-    - One can create an account Email, Password, Username on this page.
+
+Login:
+
+    - A button to switch between Signup and Login
+
+    Signup:
+    - One can create an account Email, Password, univID on this page.
     - Only regular users can register themselves,
     - Admin are manually added to the DB, not thourgh the website.
 
-Login page:
-
-    - Use your username/password pair to log in.
+    Login:
+    - Use your univID/password pair to log in.
     - Being logged in allows you to
         * discuss on chat AND to send private messages
         * save your score to each exercise categories (solved / total).
