@@ -4,19 +4,27 @@
   "author": "Benjamin Priour",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
-    "test": "jest",
-    "devstart": "nodemon ./bin/www",
-    "serverstart": "DEBUG=bta-poll-server:* npm run devstart"
+    "deploy": "NODE_ENV=production node ./bin/www", 
+    "start": "NODE_ENV=development node ./bin/www",
+    "test": "NODE_ENV=test jest",
+    "devstart": "NODE_ENV=development nodemon ./bin/www",
+    "serverstart": "NODE_ENV=development DEBUG=bta-poll-server:* npm run devstart"
   },
   "dependencies": {
-    "cookie-parser": "^1.4.3",
     "express": "^4.18.2",
     "http-errors": "^1.6.2",
-    "morgan": "^1.9.0",
-    "typescript": "^4.9.4",
+    "express-validator": "^7.0.0", 
+    "express-async-handler": "^1.2.0", 
+    "cookie-parser": "^1.4.3",
+    "express-session": "1.17.3",
     "mongoose": "^6.8.1",
-    "mongoose-type-email": "^1.1.2"
+    "mongoose-type-email": "^1.1.2",
+    "passport": "^0.6.0",
+    "passport-local": "^1.0.0",
+    "connect-mongo": "^5.0.0",
+    "bcryptjs": "^2.4.3",
+    "morgan": "^1.9.0",
+    "dotenv": "16.0.3"
   },
   "devDependencies": {
     "jest": "^29.5.0",

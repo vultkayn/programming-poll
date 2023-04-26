@@ -1,33 +1,54 @@
+require('dotenv').config();
+
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-
-var apiRouter = require('./api');
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
+const passport = require('./passport/setup');
+var apiRouter = require('./routes/api');
 
 var app = express();
 
-const mongoose = require("mongoose");
 // connect database
-const mongoDB = "mongodb+srv://vultkayn:KwtfvvGVp0uuvXOy@cluster0.iklopuz.mongodb.net/prog_feedback?retryWrites=true&w=majority";
-mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedTopology: true});
-const db = mongoose.connection;
-db.on("error", console.error.bind(console, "MongoDB connection error: "));
+const mongoose = require('./db/connection');
+  
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
-
+// Request formatting and parser middlewares 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+// Session and authentification middlewares
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: {/* secure: true, */ httpOnly: true},
+  store: MongoStore.create({
+    client: mongoose.connection.getClient(),
+    dbName: "mongo_store",
+    collectionName: "sessions"
+  })
+  .on('create', () => console.log("A session has been created"))
+  .on('update', () => console.log("A session has been updated"))
+  .on('destroy', () => console.log("A session has been destroyed"))
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
-app.use('/api', indexRouter);
-app.use('*', usersRouter);
+// Set up routes static, to api endpoint, to the client
+app.use(express.static(path.resolve(__dirname, '../client/build')));
+app.use('/api', apiRouter);
+// send to React client
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
+});
 
+
+// Error handlers middlewares
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
@@ -35,13 +56,11 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
+  if (!err.status)
+    console.log(err);
   res.status(err.status || 500);
-  res.render('error');
+  res.json(req.app.get('env') === 'development' ? err : {});
 });
+
 
 module.exports = app;
