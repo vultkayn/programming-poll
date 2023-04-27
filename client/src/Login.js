@@ -88,14 +88,8 @@ Form change according to that.
 export default function LoginPage () {
     const [isSignup, setIsSignup] = useState(false);
 
-    
-    return ( <>
-        <button onClick={() => setIsSignup(! isSignup)} className="btn login-swap-btn">{isSignup ? 'Login' : 'Signup'}</button>
-<<<<<<< Updated upstream
-=======
-        
->>>>>>> Stashed changes
-        {(isSignup) ? <SignupForm /> : <LoginForm />}
-        </>
-    );
+    return (<>
+    {(isSignup) ? <SignupForm /> : <LoginForm />}
+    <button onClick={() => setIsSignup(! isSignup)} className="btn login-swap-btn">{isSignup ? 'Login' : 'Signup'}</button>
+    </>);
 }
