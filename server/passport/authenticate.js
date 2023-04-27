@@ -1,4 +1,4 @@
-const {body} = require('express-validator');
+const {body, oneOf} = require('express-validator');
 
 const passport = require("passport");
 const {validateSanitization} = require('../sanitizers');
@@ -51,17 +51,15 @@ exports.loggedIn = function (req, res, next) {
 
 // done is a callback that should be provided, function(err: Any, hasAccess: boolean, info?: Any)
 // required is a bit field of required access rights.
-exports.hasAccess = (required, user, done) => (req, res, next) =>{
+exports.hasAccess = (required, user, done) =>{
     if (!user)
         return done(null, false, {message: "User not logged in"});
     User.findById(user.id)
         .then(user => {
-            res.status(404);
             if (!user || !user.auth)
                return done(null, false, {message: "User not found"});
             if (user.auth & required !== required)
                 return done(null, false, {message: "Unsufficient permission"})
-            res.status(200);
             return done(null, true)
         })
         .catch((err) => done(err, false))

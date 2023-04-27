@@ -38,7 +38,7 @@ async function signup(req, univID, password) {
                 .then(user => {return {user}})
                 .catch(err => {return {user: false, err}});
         })
-        .catch(err => {user: false, err});
+        .catch(err => {return {user: false, err}});
 }
 
 // define LocalStrategy
