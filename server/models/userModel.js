@@ -44,20 +44,12 @@ const UserSchema = new Schema({
         max: 2100,
         required: true
     },
-    /*  "class": {
-        type: String,
-        trim: true,
-        uppercase: true,
-        minLength: 2,
-        maxLength: 10
+    auth: {
+        type: Number,
+        min: 0,
+        max: 7,
+        default: 0,
     },
-    group: {
-        type: String,
-        trim: true,
-        uppercase: true,
-        minLength: 2,
-        maxLength: 10
-    }, */
     identity: {
         type: IdentitySchema,
         default: {}

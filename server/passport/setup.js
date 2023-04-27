@@ -76,7 +76,7 @@ passport.use('signup',
         passReqToCallback: true,
     },
     (req, univID, password, done) => {
-        User.findOne({"identity.univID": univID})
+        User.findOne({$or: [{"identity.univID": univID}, {"identity.email": req.body.email}]})
             .then( user => {
                 // no such user, create it.
                 if (!user) {

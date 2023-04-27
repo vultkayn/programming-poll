@@ -27,12 +27,22 @@ describe('POST /login - Log in account', () => {
             .expect(401, {message: "User not found"})
     })
 
-    test('Succesful login', async () => {
+    test('Succesful login - univID', async () => {
         await request(app)
             .post(url)
             .set('Content-Type', 'application/json')
             .set('Accept', 'application/json')
             .send({"password": "totoFaitdukayak2!", "univID": "benpr438"})
+            .expect('Content-Type', /json/)
+            .expect(200, {univID: "benpr438"})
+    })
+
+    test('Succesful login - email', async () => {
+        await request(app)
+            .post(url)
+            .set('Content-Type', 'application/json')
+            .set('Accept', 'application/json')
+            .send({"password": "totoFaitdukayak2!", "email": "benpr438@student.liu.se"})
             .expect('Content-Type', /json/)
             .expect(200, {univID: "benpr438"})
     })
@@ -85,12 +95,25 @@ describe('POST / - Create account', () => {
         "email": "benpr438@student.liu.se"
         }
 
-    test('User already exists', async () => {
+    test('User already exists - univID', async () => {
         await request(app)
             .post(url)
             .set('Content-Type', 'application/json')
             .set('Accept', 'application/json')
-            .send(payload)
+            .send({...payload, email: "doesnt@gmail.com"})
+            .expect('Content-Type', /json/)
+            .expect(400, {message: "User already exists"})
+    })
+
+    test('User already exists - email', async () => {
+        await request(app)
+            .post(url)
+            .set('Content-Type', 'application/json')
+            .set('Accept', 'application/json')
+            .send({
+                ...payload,
+                univID: "doesnt"
+            })
             .expect('Content-Type', /json/)
             .expect(400, {message: "User already exists"})
     })

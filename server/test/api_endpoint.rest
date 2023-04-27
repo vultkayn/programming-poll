@@ -3,7 +3,7 @@ content-type: application/json
 
 {
     "univID": "benpr438",
-    "password": "tooFaitdukayak2!"
+    "password": "totoFaitdukayak2!"
 }
 
 ### 
@@ -12,8 +12,8 @@ POST  http://127.0.0.1:8888/api/account/
 content-type: application/json
 
 {
-"univID": "benpr438",
-"password": "totoaitdukayak2!",
+"univID": "benpr4440",
+"password": "totoaitdukaFyak2!",
 "firstName": "toto",
 "lastName": "titi",
 "promo": 2024,

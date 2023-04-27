@@ -22,7 +22,7 @@ const passportCall = (name) => (req, res, next) => {
 };
 
 exports.connexion = [
-    body('univID').escape(),
+    oneOf([body('univID').escape(), body('email').escape().isEmail()]),
     body('password').notEmpty(),
     validateSanitization,
     passportCall('login')
@@ -56,10 +56,12 @@ exports.hasAccess = (required, user, done) => (req, res, next) =>{
         return done(null, false, {message: "User not logged in"});
     User.findById(user.id)
         .then(user => {
+            res.status(404);
             if (!user || !user.auth)
                return done(null, false, {message: "User not found"});
             if (user.auth & required !== required)
                 return done(null, false, {message: "Unsufficient permission"})
+            res.status(200);
             return done(null, true)
         })
         .catch((err) => done(err, false))
