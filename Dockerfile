@@ -1,0 +1,26 @@
+FROM node:latest
+
+WORKDIR /usr/src/app
+RUN mkdir server client
+
+ARG NODE_ENV
+ENV NODE_ENV $NODE_ENV
+
+COPY server/package*.json /usr/src/app/server/
+WORKDIR /usr/src/app/server
+RUN npm install
+
+COPY client/package*.json /usr/src/app/client
+WORKDIR /usr/src/app/client
+RUN npm install
+
+COPY . /usr/src/app
+
+WORKDIR /usr/src/app/client
+RUN npm run build
+
+WORKDIR /usr/src/app/
+
+ENV PORT 8888
+EXPOSE $PORT
+CMD [ "sh", "./docker-cmd.sh", "start" ]
