@@ -76,7 +76,7 @@ passport.use('signup',
         passReqToCallback: true,
     },
     (req, univID, password, done) => {
-        User.findOne({univID: univID})
+        User.findOne({"identity.univID": univID})
             .then( user => {
                 // no such user, create it.
                 if (!user) {

@@ -2,6 +2,11 @@ import {useState, useRef} from 'react';
 import Form from './components/Form';
 
 
+/**
+ * This should be the /login page once the Router is set up.
+ * 
+ */
+
 function LoginForm () {
     let invalids = {
         "univID": false,
@@ -25,19 +30,48 @@ function LoginForm () {
                 required={true} />
         </label>
         <label>
-        Password: <input name="password" type="password" required={true} />
+        Password: <input 
+                name="password"
+                type="password"
+                required={true} />
         </label>
         <button type="submit">Submit</button>
     </Form>);
 }
 
 function SignupForm () {
-    return (<Form endpoint="/api/account/signup" id="Signup-form">
+    return (<Form method="post" endpoint="/api/account/" id="Signup-form">
         <label>
         UnivID: <input name="univID" type="text" required={true} />
         </label>
         <label>
         Password: <input name="password" type="password" required={true} />
+        </label>
+        <label>
+        First Name: <input 
+                name="firstName"
+                type="text"
+                required={true} />
+        </label>
+        <label>
+        Last Name: <input 
+                name="lastName"
+                type="text"
+                required={true} />
+        </label>
+        <label>
+        Email: <input 
+                name="email"
+                type="email"
+                required={true} />
+        </label>
+        <label>
+        Promo: <input 
+                name="promo"
+                type="number"
+                max="2100"
+                min="1990"
+                required={true} />
         </label>
         <button type="submit">Submit</button>
     </Form>);
@@ -55,6 +89,8 @@ export default function LoginPage () {
     const [isSignup, setIsSignup] = useState(false);
 
     
-    return ( <LoginForm />
+    return ( <>
+        {(isSignup) ? <SignupForm /> : <LoginForm />}
+        </>
     );
 }

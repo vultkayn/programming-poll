@@ -23,6 +23,7 @@ const passportCall = (name) => (req, res, next) => {
 
 exports.connexion = [
     body('univID').escape(),
+    body('password').notEmpty(),
     validateSanitization,
     passportCall('login')
 ];
@@ -45,12 +46,12 @@ exports.signup = [
 
 exports.loggedIn = function (req, res, next) {
     if (req.user) next();
-    else res.redirect('/login');
+    else next({status: 401, message: "Not logged in"});
 };
 
 // done is a callback that should be provided, function(err: Any, hasAccess: boolean, info?: Any)
 // required is a bit field of required access rights.
-exports.hasAccess = (required, user, done) => {
+exports.hasAccess = (required, user, done) => (req, res, next) =>{
     if (!user)
         return done(null, false, {message: "User not logged in"});
     User.findById(user.id)
@@ -60,7 +61,8 @@ exports.hasAccess = (required, user, done) => {
             if (user.auth & required !== required)
                 return done(null, false, {message: "Unsufficient permission"})
             return done(null, true)
-        });
+        })
+        .catch((err) => done(err, false))
 }
 
 exports.ACCESS = Object.freeze({
