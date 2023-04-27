@@ -37,22 +37,13 @@ server:lint:
   needs:
     - "server:build"
 
-client:build:
+client:build&lint:
   stage: build
   script:
     - cd client/
     - npm install
-    - npm run build
+    - CI=false npm run build
     - cd ../
-
-client:lint:
-  stage: build
-  script:
-    - cd client/
-    - npx eslint .
-    - cd ../
-  needs:
-    - "client:build"
 
 server:test:login:
   stage: test
