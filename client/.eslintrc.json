@@ -17,6 +17,8 @@
         "react"
     ],
     "rules": {
+        "no-unused-vars": "warn",
+        "react/prop-types": "off"
     },
-    "ignorePatterns": ["**/tests/*.js", "**/*.test.js"]
+    "ignorePatterns": ["**/tests/*.js", "**/*.test.js", "**/build/*"]
 }

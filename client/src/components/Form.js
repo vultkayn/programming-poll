@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import React, {useState} from 'react';
 import axios from 'axios';
 import './styles/Form.css'
 
@@ -28,12 +28,12 @@ export function Input({
 
     return (
         <>
-        {label ? <label for={name}>input</label> : input}
+        {label ? <label htmlFor={name}>input</label> : input}
         </>
     );
 }
 
-export default function Form({, method, endpoint, children}) {
+export default function Form({method, endpoint, children}) {
     // const [payload, setPayload] = useState({});
 
     axios.defaults.headers.post['Content-Type'] = 'application/json';
