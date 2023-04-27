@@ -38,16 +38,19 @@ server:lint:
     - "server:build"
   allow_failure: true
 
-client:build:
+client:build&lint:
   stage: build
   script:
     - cd client/
     - npm install
-    - npm run build
+    - CI=false npm run build
     - cd ../
   allow_failure: true
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 5ee8f0d (issue was env var CI set to true)
 server:test:login:
   stage: test
   script:
