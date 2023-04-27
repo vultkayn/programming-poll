@@ -2,8 +2,39 @@ import {useState} from 'react';
 import axios from 'axios';
 import './styles/Form.css'
 
-export default function Form({validator, method, endpoint, children}) {
-    const [payload, setPayload] = useState({});
+
+export function Input({
+    name,
+    className,
+    label = "",
+    validator = (name, value) => {},
+    type = "text",
+    bubbleUp = false,
+    required = false,
+    onFocus = (e) => {}}) {
+    function handleChange (e) {
+        e.preventDefault();
+        if (! bubbleUp) e.stopPropagation();
+        validator(e.target.name, e.target.value);
+    }
+
+    let input = <input
+        className={`input ${className}`}
+        name={name} 
+        type={type} 
+        onChange={handleChange}
+        onFocus={onFocus}
+        required={required} />
+
+    return (
+        <>
+        {label ? <label for={name}>input</label> : input}
+        </>
+    );
+}
+
+export default function Form({, method, endpoint, children}) {
+    // const [payload, setPayload] = useState({});
 
     axios.defaults.headers.post['Content-Type'] = 'application/json';
 
@@ -31,14 +62,8 @@ export default function Form({validator, method, endpoint, children}) {
     }
     
     function handleChange(e) {
-        e.preventDefault();
-        console.log(e.target.name, "bubbled up onchange event with value", e.target.value);
-        validator(e.target.name, e.target.value)
-        setPayload({
-            ...payload,
-            [e.target.name]: e.target.value
-        });
-    }
+
+     }
 
     return (
     <form onChange={handleChange} onSubmit={handleSubmit}>

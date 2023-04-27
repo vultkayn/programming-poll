@@ -55,6 +55,10 @@ export default function LoginPage () {
     const [isSignup, setIsSignup] = useState(false);
 
     
-    return ( <LoginForm />
+    return ( <>
+        <button onClick={() => setIsSignup(! isSignup)} className="btn login-swap-btn">{isSignup ? 'Login' : 'Signup'}</button>
+        
+        {(isSignup) ? <SignupForm /> : <LoginForm />}
+        </>
     );
 }
