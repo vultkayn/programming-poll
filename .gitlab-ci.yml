@@ -21,21 +21,23 @@ cache:
     - server/node_modules/
     - client/node_modules/
 
-build-server:
+server:build:
   stage: build
   script:
     - cd server/
     - npm install
     - cd ../
 
-lint-server:
+server:lint:
   stage: build
   script:
     - cd server/
     - npx eslint .
     - cd ../
+  needs:
+    - "server:build"
 
-build-client:
+client:build:
   stage: build
   script:
     - cd client/
@@ -43,14 +45,16 @@ build-client:
     - npm run build
     - cd ../
 
-lint-client:
+client:lint:
   stage: build
   script:
     - cd client/
     - npx eslint .
     - cd ../
+  needs:
+    - "client:build"
 
-test-api-login:
+server:test:login:
   stage: test
   script:
     - cd server/
@@ -58,13 +62,14 @@ test-api-login:
     - cd ../
   environment: test
 
-test-client:
+client:test:all:
   stage: test
   script:
     - cd client/
     - npm run test
     - cd ../
   environment: test
+  needs: 
 
 deploy:
   stage: deploy
