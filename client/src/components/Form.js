@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import React, {useState} from 'react';
 import axios from 'axios';
 import './styles/Form.css'
 import Debug from 'debug'
@@ -29,7 +29,7 @@ export function Input({
 
     return (
         <>
-        {label ? <label for={name}>input</label> : input}
+        {label ? <label htmlFor={name}>input</label> : input}
         </>
     );
 }

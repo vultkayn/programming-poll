@@ -38,7 +38,7 @@ async function signup(req, univID, password) {
                 .then(user => {return {user}})
                 .catch(err => {return {user: false, err}});
         })
-        .catch(err => {user: false, err});
+        .catch(err => {return {user: false, err}});
 }
 
 // define LocalStrategy
@@ -76,7 +76,7 @@ passport.use('signup',
         passReqToCallback: true,
     },
     (req, univID, password, done) => {
-        User.findOne({univID: univID})
+        User.findOne({$or: [{"identity.univID": univID}, {"identity.email": req.body.email}]})
             .then( user => {
                 // no such user, create it.
                 if (!user) {
