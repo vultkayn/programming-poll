@@ -3,15 +3,15 @@ var router = require('express').Router();
 const {hasAccess, ACCESS} = require ('../passport/authenticate');
 
 
+router.use('/', (req, res, next) => hasAccess(ACCESS.R | ACCESS.W, (err, success, info) => {
+    if (err) next(err);
+    else if (!success) res.sendStatus(404)
+    else next()
+}))
+
 router.post('/users/edit', 
-    hasAccess(ACCESS.R | ACCESS.W, (err, success, info) => {
-        if (err)
-    }),
-    
-    (err, req, res, next) => {
-        if (err && err.status == 400)
-            res.redirect(307, '/signup');
-        else next(err.errors || err);
+    (req, res, next) => {
+        next();
     }
 );
 

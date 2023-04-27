@@ -1,18 +1,24 @@
 var router = require('express').Router();
 
-const {connexion, signup} = require ('../passport/authenticate');
+const {connexion, signup, loggedIn} = require ('../passport/authenticate');
 
-router.post('/signup', signup, (err, req, res, next) => {
+router.post('/', signup, (err, req, res, next) => {
     if (err && err.status == 400)
-        res.redirect(307, '/signup');
+        res.status(400).json(err.errors);
     else next(err.errors || err);
 });
 
 router.post('/login', connexion, (err, req, res, next) => {
     if (err && err.status == 401)
-        res.status(401).json(err.errors); //redirect(307, '/'); // FIXME redirect to '/login' once react.router is setup
+        res.status(401).json(err.errors); 
     else next(err.errors || err);
 });
 
+
+router.put('/', loggedIn, (err, req, res, next) => {
+    if (err && err.status == 401)
+        res.redirect(301, '/login');
+    else next(err.errors || err);
+});
 
 module.exports = router;

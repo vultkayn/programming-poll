@@ -10,4 +10,6 @@ router.use('/users', require('./users'));
 router.use('/account', require('./account'));
 router.use('/exercises', require('./exercises'));
 
+router.use('/admin', require('./admin'))
+
 module.exports = router;
