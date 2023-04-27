@@ -9,7 +9,9 @@
     "react-scripts": "5.0.1"
   },
   "devDependencies": {
-    "debug": "^4.3.4"
+    "debug": "^4.3.4",
+    "eslint": "^8.39.0",
+    "eslint-plugin-react": "^7.32.2"
   },
   "scripts": {
     "start": "react-scripts start",

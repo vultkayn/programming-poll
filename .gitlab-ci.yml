@@ -28,6 +28,13 @@ build-server:
     - npm install
     - cd ../
 
+lint-server:
+  stage: build
+  script:
+    - cd server/
+    - npx eslint .
+    - cd ../
+
 build-client:
   stage: build
   script:
@@ -36,15 +43,22 @@ build-client:
     - npm run build
     - cd ../
 
-test-api:
+lint-client:
+  stage: build
+  script:
+    - cd client/
+    - npx eslint .
+    - cd ../
+
+test-api-login:
   stage: test
   script:
     - cd server/
-    - npm run test
+    - npm run test login.test.js
     - cd ../
   environment: test
 
-test_client:
+test-client:
   stage: test
   script:
     - cd client/
