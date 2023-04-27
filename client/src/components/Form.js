@@ -1,7 +1,8 @@
 import React, {useState} from 'react';
 import axios from 'axios';
 import './styles/Form.css'
-
+import Debug from 'debug'
+const debug = Debug('component:Form')
 
 export function Input({
     name,
@@ -33,7 +34,11 @@ export function Input({
     );
 }
 
+<<<<<<< HEAD
 export default function Form({method, endpoint, children}) {
+=======
+export default function Form({method, endpoint, children, onChange = (e) => {}}) {
+>>>>>>> a89282b (revamped Form logging)
     // const [payload, setPayload] = useState({});
 
     axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -49,24 +54,20 @@ export default function Form({method, endpoint, children}) {
         formData.forEach((value, key) => object[key] = value);
         let json = JSON.stringify(object);
 
-        console.log("Form submitted to", endpoint);
+        debug("Form submitted to", endpoint);
         
         axios({
             method: method,
             url: endpoint,
             data: json
         })
-        .then((res) => console.log(res))
-        .catch((err) => console.log("err:", err));
-        
+        .then((res) => debug(res))
+        .catch((err) => debug("err:", err));
     }
     
-    function handleChange(e) {
-
-     }
 
     return (
-    <form onChange={handleChange} onSubmit={handleSubmit}>
+    <form onChange={onChange} onSubmit={handleSubmit}>
         {children}
     </form>
     );
