@@ -28,12 +28,20 @@ export function Input({
 
     return (
         <>
+<<<<<<< Updated upstream
         {label ? <label htmlFor={name}>input</label> : input}
+=======
+        {label ? <label for={name}>input</label> : input}
+>>>>>>> Stashed changes
         </>
     );
 }
 
+<<<<<<< Updated upstream
 export default function Form({method, endpoint, children}) {
+=======
+export default function Form({, method, endpoint, children}) {
+>>>>>>> Stashed changes
     // const [payload, setPayload] = useState({});
 
     axios.defaults.headers.post['Content-Type'] = 'application/json';

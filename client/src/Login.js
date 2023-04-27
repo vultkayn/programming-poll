@@ -91,6 +91,10 @@ export default function LoginPage () {
     
     return ( <>
         <button onClick={() => setIsSignup(! isSignup)} className="btn login-swap-btn">{isSignup ? 'Login' : 'Signup'}</button>
+<<<<<<< Updated upstream
+=======
+        
+>>>>>>> Stashed changes
         {(isSignup) ? <SignupForm /> : <LoginForm />}
         </>
     );
