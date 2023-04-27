@@ -1,0 +1,21 @@
+.Navbar {
+    display: flex;
+    flex-direction: row;
+    align-items: end;
+    justify-content: space-around;
+    text-align: center;
+    height: 80px;
+    background-color: yellow;
+    border: 2px solid red;
+}
+
+.Tab {
+    cursor: pointer;
+    color: black;
+    padding: 2px;
+    border: 1px solid black;
+}
+
+.Tab-active {
+    color: blue;
+}

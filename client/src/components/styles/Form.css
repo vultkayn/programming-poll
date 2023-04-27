@@ -1,0 +1,7 @@
+input {
+    padding: 3px;
+}
+
+.invalid-input {
+    border: 1px solid red;
+};

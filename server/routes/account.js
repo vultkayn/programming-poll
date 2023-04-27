@@ -9,8 +9,8 @@ router.post('/signup', signup, (err, req, res, next) => {
 });
 
 router.post('/login', connexion, (err, req, res, next) => {
-    if (err && err.status == 400)
-        res.redirect(307, '/login');
+    if (err && err.status == 401)
+        res.status(401).json(err.errors); //redirect(307, '/'); // FIXME redirect to '/login' once react.router is setup
     else next(err.errors || err);
 });
 

@@ -8,7 +8,7 @@ const passportCall = (name) => (req, res, next) => {
     return passport.authenticate(name, function(err, user, info) {
         let errors;
         if (err) errors = err;
-        else if (!user) errors = {status: info.status, errors: info.message || info};
+        else if (!user) errors = {status: info.status, errors: {message: info.message || info}};
         if (errors) next(errors);
         else {
             req.logIn(user, function (err) {

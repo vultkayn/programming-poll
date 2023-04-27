@@ -5,8 +5,6 @@ const bcrypt = require('bcryptjs');
 
 
 passport.serializeUser(function(user, done) {
-    console.log("user within serializeUser:", user);
-    console.log("data serialized:", {id: user.id, univID: user.univID});
     return done (null, {id: user.id, univID: user.univID});
 });
 
@@ -17,7 +15,6 @@ passport.deserializeUser(function (user, done) {
 
 // FIXME fix creation of User model (especially look into IdentityModel)
 async function signup(req, univID, password) {
-    console.log(univID);
     const newUser = new User({
         identity: {
             univID: univID,
@@ -50,19 +47,19 @@ passport.use('login', new LocalStrategy({
         usernameField: "univID",
         passwordField: "password"
     },
-    (id, password, done) => {
-        User.findOne({'identity.univID': id})
+    (univID, password, done) => {
+        User.findOne({'identity.univID': univID})
             .then( user => {
                 // no such user, create it.
                 if (!user) {
-                    return done(null, false, {status: 400, message: "User not found"});
+                    return done(null, false, {status: 401, message: "User not found"});
                 } else {
                     // user was found
                     return bcrypt.compare(password, user.identity.password)
                     .then(res => {
                         if (res) // success
                             return done(null, user);
-                        return done(null, false, {status: 400, message: "Wrong password"});
+                        return done(null, false, {status: 401, message: "Wrong password"});
                     })
                 }
             })
@@ -78,12 +75,12 @@ passport.use('signup',
         passwordField: "password",
         passReqToCallback: true,
     },
-    (req, id, password, done) => {
-        User.findOne({univID: id})
+    (req, univID, password, done) => {
+        User.findOne({univID: univID})
             .then( user => {
                 // no such user, create it.
                 if (!user) {
-                    signup(req, id, password)
+                    signup(req, univID, password)
                         .then ( ({user, err}) => {
                             if (err)
                                 return done(null, false, err);
@@ -91,7 +88,7 @@ passport.use('signup',
                         });
                 } else {
                     // user was found
-                    return done(null, user, {status: 400, message: "User exists already"});
+                    return done(null, false, {status: 400, message: "User already exists"});
                 }
             })
             .catch(err => {

@@ -6,14 +6,13 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const session = require("express-session");
-const MongoStore = require("connect-mongo");
 const passport = require('./passport/setup');
 var apiRouter = require('./routes/api');
 
 var app = express();
 
 // connect database
-const mongoose = require('./db/connection');
+const {MongoStore} = require('./db/connection');
   
 
 // Request formatting and parser middlewares 
@@ -27,14 +26,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: {/* secure: true, */ httpOnly: true},
-  store: MongoStore.create({
-    client: mongoose.connection.getClient(),
-    dbName: "mongo_store",
-    collectionName: "sessions"
-  })
-  .on('create', () => console.log("A session has been created"))
-  .on('update', () => console.log("A session has been updated"))
-  .on('destroy', () => console.log("A session has been destroyed"))
+  store: MongoStore
 }));
 app.use(passport.initialize());
 app.use(passport.session());
