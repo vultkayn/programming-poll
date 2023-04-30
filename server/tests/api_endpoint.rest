@@ -2,8 +2,8 @@ POST http://127.0.0.1:8888/api/account/login/
 content-type: application/json
 
 {
-    "univID": "benpr438",
-    "password": "totoFaitdukayak2!"
+    "email": "benpr438@student.liu.se",
+    "password": ""
 }
 
 ### 
@@ -12,8 +12,8 @@ POST  http://127.0.0.1:8888/api/account/
 content-type: application/json
 
 {
-"univID": "benpr4440",
-"password": "totoaitdukaFyak2!",
+"univID": "benpr438",
+"password": "nouppercase",
 "firstName": "toto",
 "lastName": "titi",
 "promo": 2024,

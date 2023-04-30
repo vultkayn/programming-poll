@@ -45,21 +45,25 @@ async function signup(req, univID, password) {
 // strategy responsible both for connection and sign up
 passport.use('login', new LocalStrategy({
         usernameField: "univID",
-        passwordField: "password"
+        passwordField: "password",
+        passReqToCallback: true,
     },
-    (univID, password, done) => {
-        User.findOne({'identity.univID': univID})
+    (req, univID, password, done) => {
+        let toBeFound = {"identity.univID": univID};
+        if (req.body.email !== undefined)
+            toBeFound = {"identity.email": req.body.email};
+        User.findOne(toBeFound)
             .then( user => {
                 // no such user, create it.
                 if (!user) {
-                    return done(null, false, {status: 401, message: "User not found"});
+                    return done(null, false, {status: 401, message: "user not found"});
                 } else {
                     // user was found
                     return bcrypt.compare(password, user.identity.password)
                     .then(res => {
                         if (res) // success
                             return done(null, user);
-                        return done(null, false, {status: 401, message: "Wrong password"});
+                        return done(null, false, {status: 401, message: "wrong password"});
                     })
                 }
             })
@@ -88,7 +92,7 @@ passport.use('signup',
                         });
                 } else {
                     // user was found
-                    return done(null, false, {status: 400, message: "User already exists"});
+                    return done(null, false, {status: 400, message: "user already exists"});
                 }
             })
             .catch(err => {
