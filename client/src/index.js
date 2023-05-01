@@ -1,9 +1,52 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
+import Root from './routes/root';
+import ErrorPage from './routes/error-page';
+import { LoginPage, SignupPage } from './routes/login';
+import { ProfilePage, EditProfilePage } from './routes/account';
+import Home from './routes/home';
 import './index.css';
 
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Root />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        errorElement: <ErrorPage />,
+        children: [
+          {
+            index: true,
+            element: <Home />,
+          },
+          {
+            path: "account/login/",
+            element: <LoginPage />,
+          },
+          {
+            path: "account/signup/",
+            element: <SignupPage />
+          },
+          {
+            path: "account/:id",
+            element: <ProfilePage />
+          },
+          {
+            path: "account/:id/edit",
+            element: <EditProfilePage />
+          },
+        ]
+      }
+    ],
+  }
+]);
+
+
 ReactDOM.render(
-  <App />,
+  <RouterProvider router={router} />,
   document.getElementById('root')
 );
