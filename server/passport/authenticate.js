@@ -22,18 +22,23 @@ const passportCall = (name) => (req, res, next) => {
 };
 
 exports.connexion = [
-    oneOf([body('univID').escape(), body('email').escape().isEmail()]),
+    oneOf([body('univID').escape().notEmpty(), body('email').escape().isEmail()]),
     body('password').notEmpty(),
     validateSanitization,
+    (req, res, next) => {
+        if (req.body.univID === undefined)
+            req.body.univID = "noneProvided"; 
+        next();
+    },
     passportCall('login')
 ];
 
 exports.signup = [
-    body('univID').escape(),
-    body('promo').escape(),
-    body('lastName').escape(),
-    body('firstName').escape(),
-    body('email').escape(),
+    body('univID').escape().notEmpty(),
+    body('promo').escape().isInt({max: 2100, min: 1990}),
+    body('lastName').escape().notEmpty(),
+    body('firstName').escape().notEmpty(),
+    body('email').escape().isEmail(),
     body('password')
         .isStrongPassword({minLength: 8, minUppercase: 1, minNumbers: 1, minSymbols: 1}),
         // .withMessage('Password should contain at least 1 uppercase, 1 number, 1 symbol'),
@@ -46,20 +51,20 @@ exports.signup = [
 
 exports.loggedIn = function (req, res, next) {
     if (req.user) next();
-    else next({status: 401, message: "Not logged in"});
+    else next({status: 401, message: "not logged in"});
 };
 
 // done is a callback that should be provided, function(err: Any, hasAccess: boolean, info?: Any)
 // required is a bit field of required access rights.
 exports.hasAccess = (required, user, done) =>{
     if (!user)
-        return done(null, false, {message: "User not logged in"});
+        return done(null, false, {message: "user not logged in"});
     User.findById(user.id)
         .then(user => {
             if (!user || !user.auth)
-               return done(null, false, {message: "User not found"});
+               return done(null, false, {message: "user not found"});
             if (user.auth & required !== required)
-                return done(null, false, {message: "Unsufficient permission"})
+                return done(null, false, {message: "unsufficient permission"})
             return done(null, true)
         })
         .catch((err) => done(err, false))
