@@ -47,10 +47,6 @@ client:build&lint:
     - cd ../
   allow_failure: true
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 5ee8f0d (issue was env var CI set to true)
 server:test:login:
   stage: test
   script:
@@ -69,7 +65,7 @@ client:test:all:
     - cd ../
   environment: test
   needs:
-    - "client:build"
+    - "client:build&lint"
 
 deploy:
   stage: deploy
