@@ -14,7 +14,7 @@ export default function Root () {
       {
         key: 1,
         name: "login",
-        to: "account/login/"
+        to: "/account/login/"
       }
     ]}
   />

@@ -41,7 +41,6 @@ exports.signup = [
     body('email').escape().isEmail(),
     body('password')
         .isStrongPassword({minLength: 8, minUppercase: 1, minNumbers: 1, minSymbols: 1}),
-        // .withMessage('Password should contain at least 1 uppercase, 1 number, 1 symbol'),
 
     validateSanitization,
 
