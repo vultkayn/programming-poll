@@ -46,35 +46,29 @@ export function SignupPage () {
         variant="text"
         component={Link}
         to="/account/login">
-        Signup
+        Login
       </Button>
       <Form method="post" endpoint="/api/account/" id="Signup-form">
         <ValidatedInput label='UnivID:' name="univID" validator={(name, value) => value.length > 1} />
         <ValidatedInput label='Password:' name="password" type="password" validator={passwordStrengthValidator} />
         <ValidatedInput label='First Name:' name="firstName" validator={(n, v) => (v.length > 1 && v.length < 15)} />
-        <ValidatedInput label='Last Name:' name="lastName" validator={(n,v) => (v.length > 1 && v.length < 15)} />
+        <ValidatedInput label='Last Name:' name="lastName" validator={(n, v) => (v.length > 1 && v.length < 15)} />
         <ValidatedInput label='Email:' name="email" type="email" validator={emailValidator} />
         <ValidatedInput
-        label='Promo:'
-        name="promo"
-        type="text"
-        validator={(n, v, setMsg) => 
-          (/[0-9]{4}/.test(v) && parseInt(v) >= 1990 && parseInt(v) <= 2100) || (setMsg('Promotion should be between 1990 and 2100') && false) // BUG potential bug here ?
-         }
-        inputProps={{inputMode:'numeric', pattern: '[0-9]{4}'}} 
+          label='Promo:'
+          name="promo"
+          type="text"
+          validator={(n, v, setMsg) =>
+            (/[0-9]{4}/.test(v) && parseInt(v) >= 1990 && parseInt(v) <= 2100) || (setMsg('Promotion should be between 1990 and 2100') && false) // BUG potential bug here ?
+          }
+          inputProps={{ inputMode: 'numeric', pattern: '[0-9]{4}' }}
         />
         <Button className='btn-submit' variant="contained" type="submit">Submit</Button>
       </Form>
-    </>);
+    </>
+  );
 }
 
-/*
-
-Top right corner: can switch between Signup and login.
-
-Form change according to that.
-
-*/
 
 export function LoginPage () {
 
@@ -88,11 +82,11 @@ export function LoginPage () {
         Signup
       </Button>
 
-      <Form method="post" endpoint="/api/account/login" id="Login-form" validator={validator}>
+      <Form method="post" endpoint="/api/account/login" id="Login-form">
         <ValidatedInput label='UnivID:' name="univID" validator={(name, value) => value.length > 1} />
         <ValidatedInput label='Password:' name="password" type="password" validator={(name, value) => value.length > 1} />
         <Button className='btn-submit' type="submit" variant="contained">Submit</Button>
-      </Form>);
+      </Form>
     </>
   );
 }
