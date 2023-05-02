@@ -4,7 +4,6 @@
   "author": "Benjamin Priour",
   "private": true,
   "scripts": {
-    "deploy": "NODE_ENV=production node ./bin/www",
     "start": "NODE_ENV=development node ./bin/www",
     "test": "NODE_ENV=test jest",
     "devstart": "NODE_ENV=development nodemon ./bin/www",
