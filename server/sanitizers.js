@@ -5,9 +5,18 @@ exports.validateSanitization = (req, res, next) => {
 
     if (! errors.isEmpty())
     {
-        errors = {
-            errors: errors.mapped(),
-            message: "Invalid fields",
+        let flattenedErr = {};
+        errors.array({ onlyFirstError: true }).forEach((err) => {
+            if (err.type == "alternative_grouped") {
+                err.nestedErrors.forEach((err) => {
+                    flattenedErr[err[0].path] = ({msg: err[0].msg.toLowerCase(), location: err[0].location});
+                });
+            } else {
+                flattenedErr[err.path] = ({msg: err.msg.toLowerCase(), location: err.location});
+            }
+        }),
+        errors = { errors: flattenedErr,
+            message: "invalid fields",
             status: 400
         }
         next(errors);
