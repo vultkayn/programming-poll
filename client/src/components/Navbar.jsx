@@ -5,19 +5,19 @@ import { Tab, Tabs, Box } from '@mui/material';
 
 export default function Navbar ({ tabs, className = '', BoxProps = {} }) {
   const [value, setValue] = useState(0);
+  const [active, setActive] = useState(0);
+
+  const handleClick = (e) => {
+    setActive(e.currentTarget);
+  }
 
   const tabsComp = tabs.map((tab) =>
     <Tab key={tab.key}
       label={tab.label}
       component={NavLink}
       to={tab.to}
-      className={({ isActive, isPending }) =>
-        isActive
-          ? "nav-tab active"
-          : isPending
-            ? "nav-tab pending"
-            : ""
-      }
+      onClick={handleClick}
+      className={'new-tab' /* TODO active ? pending */}
     />
   );
 
@@ -29,7 +29,7 @@ export default function Navbar ({ tabs, className = '', BoxProps = {} }) {
   // BUG potential with BoxProps
   return (
     <Box {...props}>
-      <Tabs value={value} onChange={(e, newValue) => setValue(newValue)}>
+      <Tabs value={value} textColor="secondary" onChange={(e, newValue) => setValue(newValue)}>
         {tabsComp}
       </Tabs>
     </Box>

@@ -18,6 +18,4 @@ export function ProfilePage () {
 export function EditProfilePage () {
   const { user } = useLoaderData ();
 
-  
-
 }

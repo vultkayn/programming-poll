@@ -6,6 +6,8 @@ const debug = Debug('component:Form');
 import { TextField } from '@mui/material';
 
 
+// validator shall return false if there IS any issue
+
 export function ValidatedInput ({
   name,
   id = '',
@@ -29,7 +31,7 @@ export function ValidatedInput ({
     if (!bubbleUp) e.stopPropagation();
     setInvalidTxt('Invalid field');
     let invalid = required && e.target.value.length < 1
-    invalid = invalid || validator(e.target.name, e.target.value, setInvalidTxt);
+    invalid = invalid || validator(e.target.name, e.target.value, setInvalidTxt) === false;
     setIsInvalid(invalid);
     helperText = isInvalid && invalidTxt ? invalidTxt : helperText;
   }

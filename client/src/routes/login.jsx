@@ -90,3 +90,5 @@ export function LoginPage () {
     </>
   );
 }
+
+export const UserContext = React.createContext(null);
