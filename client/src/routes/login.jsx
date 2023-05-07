@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import Form, { ValidatedInput } from '../components/Form';
 import { Link } from 'react-router-dom';
 import Button from '@mui/material/Button'
+import AuthContext from '../bridge/AuthProvider';
 
 
 let passwordStrengthValidator = (name, value, setMsg) => {
@@ -71,6 +72,9 @@ export function SignupPage () {
 
 
 export function LoginPage () {
+
+  const auth = useContext(AuthContext);
+  // TODO update form to use AuthProvider Context ?
 
   return (
     <>
