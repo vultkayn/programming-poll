@@ -1,6 +1,6 @@
 import React from "react";
 import { useLoaderData } from "react-router-dom";
-import { getUser } from "../bridge/account";
+import { getUser } from "../bridge/bridge";
 
 export async function loader({ params }) {
   const user = await getUser(params.id);

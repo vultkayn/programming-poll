@@ -8,12 +8,20 @@ import Home from './routes/home';
 import './index.css';
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createApiClient } from './bridge/bridge';
+import {AuthProvider} from './bridge/AuthProvider';
 
+
+const apiClient = createApiClient();
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Root />,
+    element: (
+      <AuthProvider apiClient={apiClient}>
+        <Root />
+      </AuthProvider>
+    ),
     errorElement: <ErrorPage />,
     children: [
       {

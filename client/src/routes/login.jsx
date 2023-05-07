@@ -48,7 +48,7 @@ export function SignupPage () {
         to="/account/login">
         Login
       </Button>
-      <Form method="post" endpoint="/api/account/" id="Signup-form">
+      <Form method="post" endpoint="/api/auth/" id="Signup-form">
         <ValidatedInput label='UnivID:' name="univID" validator={(name, value) => value.length > 1} />
         <ValidatedInput label='Password:' name="password" type="password" validator={passwordStrengthValidator} />
         <ValidatedInput label='First Name:' name="firstName" validator={(n, v) => (v.length > 1 && v.length < 15)} />
@@ -82,7 +82,7 @@ export function LoginPage () {
         Signup
       </Button>
 
-      <Form method="post" endpoint="/api/account/login" id="Login-form">
+      <Form method="post" endpoint="/api/auth/login" id="Login-form">
         <ValidatedInput label='UnivID:' name="univID" validator={(name, value) => value.length > 1} />
         <ValidatedInput label='Password:' name="password" type="password" validator={(name, value) => value.length > 1} />
         <Button className='btn-submit' type="submit" variant="contained">Submit</Button>
