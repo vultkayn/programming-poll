@@ -19,8 +19,8 @@ exports.validateSanitization = (req, res, next) => {
             message: "invalid fields",
             status: 400
         }
-        next(errors);
+        return next(errors);
     }
-    else next();
+    return next();
 }
 

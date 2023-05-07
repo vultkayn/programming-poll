@@ -8,11 +8,13 @@ const logger = require('morgan');
 const session = require("express-session");
 const passport = require('./passport/setup');
 var apiRouter = require('./routes/api');
+const debug = require("debug")('bta-poll-server:app');
 
 var app = express();
 
 // connect database
 const {MongoStore} = require('./db/connection');
+const { assert } = require('console');
   
 
 // Request formatting and parser middlewares 
@@ -43,13 +45,15 @@ app.get('*', (req, res) => {
 // Error handlers middlewares
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
+  debug("Request default handled, forward to 404.");
+  debug(req);
   next(createError(404));
 });
 
 // error handler
 app.use(function(err, req, res, next) {
   if (!err.status)
-    console.log(err);
+    debug("Default handle of", err);
   res.status(err.status || 500);
   res.json(req.app.get('env') === 'development' ? err : {});
 });

@@ -1,76 +1,143 @@
-const {body, oneOf} = require('express-validator');
+const { body, oneOf } = require('express-validator');
+
+const debug = require("debug")("bta-poll-server:auth");
 
 const passport = require("passport");
-const {validateSanitization} = require('../sanitizers');
+const { validateSanitization } = require('../sanitizers');
 const User = require('../models/userModel');
 
-const passportCall = (name) => (req, res, next) => {
-    return passport.authenticate(name, function(err, user, info) {
-        let errors;
-        if (err) errors = err;
-        else if (!user) errors = {status: info.status, errors: {message: info.message || info}};
-        if (errors) next(errors);
-        else {
-            req.logIn(user, function (err) {
-                if (err)
-                    next({status: err.status, errors: err});
-                else
-                    res.status(200).json({univID: req.user.identity.univID});
-            });
+
+function handleAccessFailure (err, req, res, next)
+{
+  if (err && err.status == 401) {
+    return res.redirect(301, '/account/login');
+  }
+  else next(err.errors || err);
+}
+
+exports.handleAccessFailure = handleAccessFailure;
+
+exports.checkAuth = ({ onFailure, onSuccess } = {}) =>
+  function (req, res, next)
+  {
+    if (typeof (onFailure) !== "function") onFailure = handleAccessFailure;
+    if (typeof (onSuccess) !== "function") onSuccess = (req, res, next) => next();
+    debug('in checkAuth\n: req.user is',
+      req.user,
+      'session is',
+      req.session,
+      'Headers are:',
+      req.headers);
+    if (!req.user) return onFailure({ status: 401, message: "not logged in" }, req, res, next);
+    if (req.body.univID && req.body.univID !== req.user.univID
+      || req.body.id && req.body.id !== req.user.id)
+      return onFailure({ status: 401, message: "not logged in" }, req, res, next);
+    return onSuccess(res, res, next);
+  };
+
+exports.checkAuthAs = (
+  { univID,
+    id,
+    onFailure = (err, req, res, next) => { },
+    onSuccess = (req, res, next) => { }
+  } = { univID: null, id: null }) =>
+  function (req, res, next)
+  {
+    if (typeof (onFailure) !== "function") onFailure = handleAccessFailure;
+    if (typeof (onSuccess) !== "function") onSuccess = (req, res, next) => next();
+    if (!req.user || univID === undefined || id === undefined) return onFailure({ status: 401, message: "not logged in" }, req, res, next);
+    if (req.user.univID === univID) return onSuccess(req, res, next);
+    if (req.user.id === id) return onSuccess(req, res, next);
+    return onFailure({ status: 401, message: "not logged in" }, req, res, next);
+  }
+
+
+const passportCall = (name) => (err, req, res, next) =>
+{
+  debug("In passport call wrapper, [err,next]:", err, next);
+
+  return passport.authenticate(name, function (err, user, info)
+  {
+    debug("In authenticate", name);
+    let errors;
+    if (err) errors = err;
+    else if (!user) errors = { status: info.status, errors: { message: info.message || info } };
+
+    if (errors) {
+      debug("authenticate: errors", errors);
+      return next(errors);
+    }
+    else {
+      return req.logIn(user, function (err)
+      {
+        debug("in logIn");
+        if (err) {
+          debug("in logIn error");
+          return next({ status: err.status, errors: err });
         }
-    }) (req, res, next);
+        else {
+          return res.status(200).json({ univID: req.user.univID });
+        }
+      });
+    }
+  })(req, res, next);
 };
 
 exports.connexion = [
-    oneOf([body('univID').escape().notEmpty(), body('email').escape().isEmail()]),
-    body('password').notEmpty(),
-    validateSanitization,
-    (req, res, next) => {
-        if (req.body.univID === undefined)
-            req.body.univID = "noneProvided"; 
-        next();
-    },
-    passportCall('login')
+  oneOf([body('univID').escape().notEmpty(), body('email').escape().isEmail()]),
+  body('password').notEmpty(),
+  validateSanitization,
+  (req, res, next) =>
+  {
+    if (req.body.univID === undefined)
+      req.body.univID = "noneProvided";
+    debug("create univID if missing");
+    next();
+  },
+  this.checkAuth({
+    onFailure: passportCall('login'),
+    onSuccess: (req, res, next) => { debug("already logged in as", req.user); res.status(200).json({ univID: req.user.univID }); }
+  }),
 ];
 
 exports.signup = [
-    body('univID').escape().notEmpty(),
-    body('promo').escape().isInt({max: 2100, min: 1990}),
-    body('lastName').escape().notEmpty(),
-    body('firstName').escape().notEmpty(),
-    body('email').escape().isEmail(),
-    body('password')
-        .isStrongPassword({minLength: 8, minUppercase: 1, minNumbers: 1, minSymbols: 1}),
+  body('univID').escape().notEmpty(),
+  body('promo').escape().isInt({ max: 2100, min: 1990 }),
+  body('lastName').escape().notEmpty(),
+  body('firstName').escape().notEmpty(),
+  body('email').escape().isEmail(),
+  body('password')
+    .isStrongPassword({ minLength: 8, minUppercase: 1, minNumbers: 1, minSymbols: 1 }),
 
-    validateSanitization,
+  validateSanitization,
 
-    // doesnt handle errors, but do send response if successful after signup.
-    passportCall('signup')
+  // doesnt handle errors, but do send response if successful after signup.
+  this.checkAuth({
+    onFailure: passportCall('signup'),
+    onSuccess: (req, res, next) => { debug("already logged in as", req.user); res.status(200).json({ univID: req.user.univID }); }
+  })
 ];
-
-exports.loggedIn = function (req, res, next) {
-    if (req.user) next();
-    else next({status: 401, message: "not logged in"});
-};
 
 // done is a callback that should be provided, function(err: Any, hasAccess: boolean, info?: Any)
 // required is a bit field of required access rights.
-exports.hasAccess = (required, user, done) =>{
-    if (!user)
-        return done(null, false, {message: "user not logged in"});
-    User.findById(user.id)
-        .then(user => {
-            if (!user || !user.auth)
-               return done(null, false, {message: "user not found"});
-            if (user.auth & required !== required)
-                return done(null, false, {message: "unsufficient permission"})
-            return done(null, true)
-        })
-        .catch((err) => done(err, false))
+exports.hasAccessRights = (required, user, done) =>
+{
+  if (!user)
+    return done(null, false, { message: "user not logged in" });
+  User.findById(user.id)
+    .then(user =>
+    {
+      if (!user || !user.auth)
+        return done(null, false, { message: "user not found" });
+      if (user.auth & required !== required)
+        return done(null, false, { message: "unsufficient permission" })
+      return done(null, true)
+    })
+    .catch((err) => done(err, false))
 }
 
 exports.ACCESS = Object.freeze({
-    R: 1,
-    W: 2,
-    X: 4
+  R: 1,
+  W: 2,
+  X: 4
 });

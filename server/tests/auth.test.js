@@ -2,7 +2,7 @@ const request = require('supertest');
 
 const app = require('../app')
 
-const baseUrl = '/api/account'
+const baseUrl = '/api/auth'
 
 describe('POST /login - Log in account', () => {
     let url = baseUrl + '/login'
@@ -35,17 +35,19 @@ describe('POST /login - Log in account', () => {
             .send({"password": "totoFaitdukayak2!", "univID": "benpr438"})
             .expect('Content-Type', /json/)
             .expect(200, {univID: "benpr438"})
-    })
-
-    test('Successful login - email', async () => {
-        await request(app)
+            .expect((res) => {if (! ('set-cookie' in res.headers)) throw new Error('Missing set-cookie')})
+          })
+          
+          test('Successful login - email', async () => {
+            await request(app)
             .post(url)
             .set('Content-Type', 'application/json')
             .set('Accept', 'application/json')
             .send({"password": "totoFaitdukayak2!", "email": "benpr438@student.liu.se"})
             .expect('Content-Type', /json/)
             .expect(200, {univID: "benpr438"})
-    })
+            .expect((res) => {if (! ('set-cookie' in res.headers)) throw new Error('Missing set-cookie')})
+          })
 
     test('Email priority over univID', async () => {
         await request(app)
@@ -55,6 +57,7 @@ describe('POST /login - Log in account', () => {
             .send({"password": "totoFaitdukayak2!", "email": "benpr438@student.liu.se", "univID": "benpr440"})
             .expect('Content-Type', /json/)
             .expect(200, {univID: "benpr438"})
+            .expect((res) => {if (! ('set-cookie' in res.headers)) throw new Error('Missing set-cookie')})
     })
 
     describe('Sanitization', () => {
@@ -167,32 +170,3 @@ describe('POST / - Create account', () => {
         })
     })
 });
-
-
-describe('PUT / - Update account', () => {
-    let url = baseUrl;
-
-    test('Not logged in - Valid User', async () => {
-        await request(app)
-            .put(url)
-            .set('Content-Type', 'application/json')
-            .set('Accept', 'application/json')
-            .send({
-                "univID": "benpr438"   
-            })
-            .expect(301)
-            .expect('Location', /\/login/)
-        })
-
-        test('Not logged in - Invalid User', async () => {
-        await request(app)
-            .put(url)
-            .set('Content-Type', 'application/json')
-            .set('Accept', 'application/json')
-            .send({
-                "univID": "deofoe789"   
-            })
-            .expect(301)
-            .expect('Location', /\/login/)
-    });
-})
