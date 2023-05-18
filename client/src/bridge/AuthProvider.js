@@ -43,6 +43,17 @@ export function AuthProvider ({ children, apiClient }) {
       return response.data;
     } catch (error) {
       debug("bta-poll-client:auth")("AuthProvider::login failed with", error);
+      return {}; // FIXME report error type.
+    }
+  }
+
+  async function logout () {
+    try {
+      const response = await apiClient.get('/api/auth/logout');
+      setIdentity({});
+      return response.data;
+    } catch (error) {
+      debug("bta-poll-client:auth")("AuthProvider::logout failed with", error);
       return {};
     }
   }
@@ -80,6 +91,7 @@ export function AuthProvider ({ children, apiClient }) {
   const context = {
     identity,
     login,
+    logout,
     signup,
     update,
     get,

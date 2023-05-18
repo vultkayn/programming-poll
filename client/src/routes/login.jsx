@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import Form, { ValidatedInput } from '../components/Form';
+import Form, { ValidatedInput, createFormData } from '../components/Form';
 import { Link } from 'react-router-dom';
 import Button from '@mui/material/Button'
 import AuthContext from '../bridge/AuthProvider';
@@ -40,6 +40,13 @@ let emailValidator = (name, value) => {
 }
 
 export function SignupPage () {
+  const auth = useContext(AuthContext);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    auth.signup(createFormData(e));
+  }
+
   return (
     <>
       <Button
@@ -49,7 +56,7 @@ export function SignupPage () {
         to="/account/login">
         Login
       </Button>
-      <Form method="post" endpoint="/api/auth/" id="Signup-form">
+      <Form method="post" endpoint="/api/auth/" id="Signup-form" onSubmit={handleSubmit}>
         <ValidatedInput label='UnivID:' name="univID" validator={(name, value) => value.length > 1} />
         <ValidatedInput label='Password:' name="password" type="password" validator={passwordStrengthValidator} />
         <ValidatedInput label='First Name:' name="firstName" validator={(n, v) => (v.length > 1 && v.length < 15)} />
@@ -76,6 +83,11 @@ export function LoginPage () {
   const auth = useContext(AuthContext);
   // TODO update form to use AuthProvider Context ?
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    auth.login(createFormData(e));
+  }
+
   return (
     <>
       <Button
@@ -86,7 +98,7 @@ export function LoginPage () {
         Signup
       </Button>
 
-      <Form method="post" endpoint="/api/auth/login" id="Login-form">
+      <Form method="post" endpoint="/api/auth/login" id="Login-form" onSubmit={handleSubmit}>
         <ValidatedInput label='UnivID:' name="univID" validator={(name, value) => value.length > 1} />
         <ValidatedInput label='Password:' name="password" type="password" validator={(name, value) => value.length > 1} />
         <Button className='btn-submit' type="submit" variant="contained">Submit</Button>

@@ -8,6 +8,11 @@ import axios from "axios";
 
 // validator shall return false if there IS any issue
 
+export function createFormData(e) {
+  const form = e.target;
+  return new FormData(form);
+}
+
 export function ValidatedInput ({
   name,
   id = '',
@@ -63,9 +68,7 @@ export default function Form ({ method, endpoint, children, id, onChange = (e) =
   const defaultHandleSubmit = (e) =>
   {
     e.preventDefault();
-
-    const form = e.target;
-    const formData = new FormData(form);
+    const formData = createFormData(e);
 
     /* */
 
@@ -83,9 +86,11 @@ export default function Form ({ method, endpoint, children, id, onChange = (e) =
       {
         console.error("err:", err)
         switch (err.status) {
-          case 400: // ill formed request    
+          case 400: // ill formed request
+            console.err("Ill formed request");  
             break;
-          case 401: // Unauthorized
+            case 401: // Unauthorized
+            console.err("Unauthorized");
             break;
           default:
             break;
