@@ -1,34 +1,21 @@
 var router = require('express').Router();
 
-const {loggedIn} = require('../passport/authenticate');
-const {param} = require('express-validator');
-const {validateSanitization} = require('../sanitizers');
-const User = require('../models/userModel');
+const { checkAuth } = require('../passport/authenticate');
+const { body } = require('express-validator');
+const { validateSanitization } = require('../sanitizers');
+const userController = require('../controllers/usersController');
 
 // router.post('/', signup);
 
-router.get('/:univID',
-  param('univID').escape(),
+router.put('/',
+  body('univID').escape().notEmpty(),
   validateSanitization,
-  loggedIn,
-  (req, res, next) => {
-    // TODO add test for deleted identity
-    User.findById(req.user.id)
-      .then((user) => {        
-        res.json({
-            promo: user.promo,
-            identity: user.identity
-        });
-      })
+  checkAuth(),
+  userController.update
+);
 
-    // if requested user was not found
-    // res.status(404).json('user not found');
-});
 
-router.put('/', (req, res, next) => {
-  // if (validate(req.body, EAUTH.userRW) === false)
-    // res.status(403).json('Insufficient permissions.');
-});
+router.get('/', checkAuth(), userController.detail);
 
 
 module.exports = router;

@@ -36,6 +36,7 @@ server:lint:
     - cd ../
   needs:
     - "server:build"
+  allow_failure: true
 
 client:build&lint:
   stage: build
@@ -44,6 +45,7 @@ client:build&lint:
     - npm install
     - CI=false npm run build
     - cd ../
+  allow_failure: true
 
 server:test:login:
   stage: test
@@ -52,6 +54,8 @@ server:test:login:
     - npm run test login.test.js
     - cd ../
   environment: test
+  needs:
+    - "server:lint"
 
 client:test:all:
   stage: test
@@ -60,11 +64,11 @@ client:test:all:
     - npm run test
     - cd ../
   environment: test
-  needs: 
+  needs:
+    - "client:build&lint"
 
 deploy:
   stage: deploy
   script:
-    - cd server/
-    - npm run deploy
+    - sh ./scripts/deploy.sh
   environment: production

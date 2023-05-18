@@ -1,82 +1,106 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useContext } from 'react';
 import './styles/Form.css';
 import Debug from 'debug';
 const debug = Debug('component:Form');
+import { TextField } from '@mui/material';
+import AuthContext from '../bridge/AuthProvider';
+import axios from "axios";
 
-export function Input ({
+// validator shall return false if there IS any issue
+
+export function createFormData(e) {
+  const form = e.target;
+  return new FormData(form);
+}
+
+export function ValidatedInput ({
   name,
-  className = '',
-  invalidCls = 'invalid',
-  noInvalidMsg = false,
   id = '',
-  label = "",
+  className = '',
+  bubbleUp = true,
   validator = (name, value, setMsg) => true,
+  label = "",
   type = "text",
-  bubbleUp = false,
+  variant = 'outlined',
+  color = 'primary',
+  helperText = '',
   required = true,
   onFocus = (e) => { },
-  extra = {}
-}) {
+  ...rest
+})
+{
   const [isInvalid, setIsInvalid] = useState(false);
-  const [invalidMsg, setInvalidMsg] = useState('Invalid field');
+  const [invalidTxt, setInvalidTxt] = useState('Invalid field');
 
-  function handleChange (e) {
+  function handleChange (e)
+  {
     e.preventDefault();
     if (!bubbleUp) e.stopPropagation();
-    setInvalidMsg('Invalid field');
-    setIsInvalid(validator(e.target.name, e.target.value, setInvalidMsg));
+    setInvalidTxt('Invalid field');
+    let invalid = required && e.target.value.length < 1
+    invalid = invalid || validator(e.target.name, e.target.value, setInvalidTxt) === false;
+    setIsInvalid(invalid);
+    helperText = isInvalid && invalidTxt ? invalidTxt : helperText;
   }
 
 
-  let input = <input
-    id={id}
-    className={`input ${className} ${isInvalid ? invalidCls : ''}`}
-    name={name}
-    type={type}
-    onChange={handleChange}
-    onFocus={onFocus}
-    required={required}
-    {...extra} />
-
   return (
-    <>
-      {label ? <label htmlFor={name}>input</label> : input}
-      {isInvalid && invalidMsg && !noInvalidMsg ? <span className='form-error'>{invalidMsg}</span> : null}
-    </>
+    <TextField
+      name={name}
+      id={id}
+      label={label}
+      className={className}
+      type={type}
+      onChange={handleChange}
+      onFocus={onFocus}
+      required={required}
+      error={isInvalid}
+      helperText={helperText}
+      {...rest} />
   );
 }
 
-export default function Form ({ method, endpoint, children, id, onChange = (e) => { } }) {
-  // const [payload, setPayload] = useState({});
 
-  axios.defaults.headers.post['Content-Type'] = 'application/json';
+export default function Form ({ method, endpoint, children, id, onChange = (e) => { }, onSubmit = null, toApi = true, onError = (e, err) => { } })
+{
+  const auth = useContext(AuthContext);
 
-  function handleSubmit (e) {
+  const defaultHandleSubmit = (e) =>
+  {
     e.preventDefault();
+    const formData = createFormData(e);
 
-    const form = e.target;
-    const formData = new FormData(form);
-
-    // FIXME edit API to receive FormData as well.
-    let object = {};
-    formData.forEach((value, key) => object[key] = value);
-    let json = JSON.stringify(object);
+    /* */
 
     debug("Form submitted to", endpoint);
 
-    axios({
+    const requester = toApi ? auth.send : axios.request;
+
+    requester({
       method: method,
       url: endpoint,
-      data: json
+      data: formData
     })
-      .then((res) => debug(res))
-      .catch((err) => debug("err:", err));
+      .then((res) => console.log(res))
+      .catch((err) =>
+      {
+        console.error("err:", err)
+        switch (err.status) {
+          case 400: // ill formed request
+            console.err("Ill formed request");  
+            break;
+            case 401: // Unauthorized
+            console.err("Unauthorized");
+            break;
+          default:
+            break;
+        }
+      });
   }
 
 
   return (
-    <form onChange={onChange} onSubmit={handleSubmit} id={id}>
+    <form onChange={onChange} onSubmit={onSubmit || defaultHandleSubmit} id={id}>
       {children}
     </form>
   );

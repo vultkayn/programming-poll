@@ -8,6 +8,13 @@ const logger = require('morgan');
 const session = require("express-session");
 const passport = require('./passport/setup');
 var apiRouter = require('./routes/api');
+const debug = require("debug")('bta-poll-server:app');
+const cors = require("cors");
+
+const corsOptions = {
+  origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+  optionsSuccessStatus: 200
+};
 
 var app = express();
 
@@ -33,7 +40,7 @@ app.use(passport.session());
 
 // Set up routes static, to api endpoint, to the client
 app.use(express.static(path.resolve(__dirname, '../client/build')));
-app.use('/api', apiRouter);
+app.use('/api', cors(corsOptions), apiRouter);
 // send to React client
 app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
@@ -43,13 +50,15 @@ app.get('*', (req, res) => {
 // Error handlers middlewares
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
+  debug("Request default handled, forward to 404.");
+  debug(req);
   next(createError(404));
 });
 
 // error handler
 app.use(function(err, req, res, next) {
   if (!err.status)
-    console.log(err);
+    debug("Default handle of", err);
   res.status(err.status || 500);
   res.json(req.app.get('env') === 'development' ? err : {});
 });

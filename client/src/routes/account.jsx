@@ -1,15 +1,26 @@
 import React from "react";
 import { useLoaderData } from "react-router-dom";
 
-export async function loader({ params }) {
-  const user = await getUser(params.id);
-  return { user };
+export function loader (apiClient)
+{
+  return async () =>
+  {
+    const user = await apiClient.get("/api/user");
+    return { user };
+  }
 }
 
 
-export default function ProfilePage () {
+export function ProfilePage ()
+{
   const { user } = useLoaderData();
 
-  
+
+}
+
+
+export function EditProfilePage ()
+{
+  const { user } = useLoaderData();
 
 }

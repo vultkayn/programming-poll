@@ -4,7 +4,6 @@
   "author": "Benjamin Priour",
   "private": true,
   "scripts": {
-    "deploy": "NODE_ENV=production node ./bin/www",
     "start": "NODE_ENV=development node ./bin/www",
     "test": "NODE_ENV=test jest",
     "devstart": "NODE_ENV=development nodemon ./bin/www",
@@ -14,6 +13,7 @@
     "bcryptjs": "^2.4.3",
     "connect-mongo": "^5.0.0",
     "cookie-parser": "^1.4.3",
+    "cors": "^2.8.5",
     "dotenv": "16.0.3",
     "express": "^4.18.2",
     "express-async-handler": "^1.2.0",
