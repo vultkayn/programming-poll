@@ -18,5 +18,11 @@ router.post('/login', connexion, (err, req, res, next) => {
     else next(err.errors || err);
 });
 
+router.get('/logout', (req, res, next) => {
+  req.logout(function(err) {
+    if (err) return next(err);
+    res.status(303).send('/');
+  });
+})
 
 module.exports = router;

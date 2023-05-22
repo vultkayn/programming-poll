@@ -47,15 +47,16 @@ client:build&lint:
     - cd ../
   allow_failure: true
 
-server:test:login:
+server:test:user:
   stage: test
   script:
     - cd server/
-    - npm run test login.test.js
+    - npm run test auth.test.js users.test.js
     - cd ../
   environment: test
   needs:
     - "server:lint"
+
 
 client:test:all:
   stage: test

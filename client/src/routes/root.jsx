@@ -1,59 +1,63 @@
+import React, { useContext, useState } from "react";
 import Scaffold from "../components/Scaffold";
-import { AppBar, Toolbar, Typography } from "@mui/material";
-import Navbar from "../components/Navbar";
+import { AppBar, Toolbar, Typography, Button, Tabs, Tab } from "@mui/material";
 import { NavLink } from "react-router-dom";
 import ProfileMenu from "../components/ProfileMenu";
+import AuthContext from "../bridge/AuthProvider";
 
-
-
-export default function Root () {
-
-  let appbar = <AppBar position="static">
-    <Toolbar>
-      <Typography
-        variant="h4"
-        component="div"
-        textDecoration="none"
-      >
-        <NavLink to='/' className={(isActive, isPending) =>
-          isActive
-            ? 'nav-tab active'
-            : isPending
-              ? "nav-tab pending"
-              : "nav-tab"
-        }>
-          BTA
+export default function Root() {
+  const auth = useContext(AuthContext);
+  const [value, setValue] = useState("1");
+  let appbar = (
+    <AppBar
+      position='static'
+      color='primary'
+      sx={{
+        mb: 2
+      }}>
+      <Toolbar>
+        <NavLink
+          to='/'
+        >
+          <Typography
+            variant='h4'
+            component='div'
+            textDecoration='none'>
+            BTA
+          </Typography>
         </NavLink>
-      </Typography>
 
-      <Navbar
-        tabs={[
-          {
-            key: 1,
-            to: '/account/login',
-            label: 'Login',
-          }
-        ]}
-        BoxProps={{
-          sx: {
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            width: '100%',
-            flexAlign: 'center',
-            color: 'white'
-          }
-        }}
-      />
+        <Tabs
+          value={value}
+          textColor='inherit'
+          indicatorColor='white'
+          onChange={(e, newValue) => setValue(newValue)}
+          sx={{
+            width: "100%",
+          }}
+          centered>
+          <Tab
+            key='1'
+            value='1'
+            label='Practice'
+            component={NavLink}
+            to='/exercises'
+          />
+        </Tabs>
 
-      <ProfileMenu />
-
-    </Toolbar>
-  </AppBar>
-
-  return (
-      <Scaffold
-        header={appbar}
-      />
+        {auth.logged() ? (
+          <ProfileMenu />
+        ) : (
+          <Button
+            color='inherit'
+            component={NavLink}
+            to='/account/login'>
+            Login
+          </Button>
+        )}
+      </Toolbar>
+    </AppBar>
   );
+
+  return <Scaffold header={appbar} />;
 }

@@ -1,17 +1,25 @@
 import React, { useState } from "react";
 import { IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
 import { AccountCircle } from "@mui/icons-material";
+import AuthContext from "../bridge/AuthProvider";
 
 
 
 export default function ProfileMenu ({ menuProps }) {
   const [anchorElmt, setAnchorElmt] = useState(null);
+  const auth = React.useContext(AuthContext);
 
   const handleMenu = (e) => {
     setAnchorElmt(e.currentTarget);
   }
+
   const handleClose = (e) => {
     setAnchorElmt(null);
+  }
+
+  const handleLogout = (e) => {
+    setAnchorElmt(null);
+    auth.logout();
   }
 
   menuProps = {
@@ -32,7 +40,6 @@ export default function ProfileMenu ({ menuProps }) {
 
   }
 
-  // BUG potential with menu props
   return (
     <div>
       <Tooltip title="Account">
@@ -46,7 +53,7 @@ export default function ProfileMenu ({ menuProps }) {
       </Tooltip>
       <Menu {...menuProps}>
         <MenuItem onClick={handleClose /*TODO use Context to pass user ID */}>Profile</MenuItem>
-        <MenuItem onClick={handleClose}>Logout</MenuItem>
+        <MenuItem onClick={handleLogout}>Logout</MenuItem>
       </Menu>
     </div>
   );

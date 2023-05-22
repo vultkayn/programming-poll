@@ -1,22 +1,21 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import Root from './routes/root';
-import ErrorPage from './routes/error-page';
-import { LoginPage, SignupPage } from './routes/login';
-import { ProfilePage, EditProfilePage } from './routes/account';
-import Home from './routes/home';
-import './index.css';
+import React from "react";
+import ReactDOM from "react-dom";
+import Root from "./routes/root";
+import ErrorPage from "./routes/error-page";
+import { LoginPage, SignupPage } from "./routes/account";
+import { ProfilePage, EditProfilePage } from "./routes/profile";
+import Home from "./routes/home";
+import "./index.css";
 
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { createApiClient } from './bridge/bridge';
-import {AuthProvider} from './bridge/AuthProvider';
-
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createApiClient } from "./bridge/bridge";
+import { AuthProvider } from "./bridge/AuthProvider";
 
 const apiClient = createApiClient();
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: (
       <AuthProvider apiClient={apiClient}>
         <Root />
@@ -32,29 +31,34 @@ const router = createBrowserRouter([
             element: <Home />,
           },
           {
-            path: "account/login/",
+            path: "account/login",
             element: <LoginPage />,
+            action: apiClient.login,
           },
           {
             path: "account/signup/",
-            element: <SignupPage />
+            element: <SignupPage />,
+            action: apiClient.signup,
           },
           {
-            path: "account/",
-            element: <ProfilePage />
+            path: "account/logout",
+            loader: apiClient.logout,
           },
           {
-            path: "account/edit",
-            element: <EditProfilePage />
+            path: "profile/",
+            element: <ProfilePage />,
           },
-        ]
-      }
+          {
+            path: "profile/edit",
+            element: <EditProfilePage />,
+          },
+        ],
+      },
     ],
-  }
+  },
 ]);
-
 
 ReactDOM.render(
   <RouterProvider router={router} />,
-  document.getElementById('root')
+  document.getElementById("root")
 );
