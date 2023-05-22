@@ -7,7 +7,7 @@
     "start": "NODE_ENV=development node ./bin/www",
     "test": "NODE_ENV=test jest",
     "devstart": "NODE_ENV=development nodemon ./bin/www",
-    "serverstart": "NODE_ENV=development DEBUG=bta-poll-server:* npm run devstart"
+    "serverstart": "NODE_ENV=development DEBUG=* npm run devstart"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

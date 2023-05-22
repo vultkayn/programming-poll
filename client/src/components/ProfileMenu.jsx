@@ -1,25 +1,27 @@
 import React, { useState } from "react";
 import { IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
 import { AccountCircle } from "@mui/icons-material";
-import AuthContext from "../bridge/AuthProvider";
+import { useFetcher, useNavigate } from "react-router-dom";
 
 
 
 export default function ProfileMenu ({ menuProps }) {
   const [anchorElmt, setAnchorElmt] = useState(null);
-  const auth = React.useContext(AuthContext);
+  const navigate = useNavigate();
+  const fetcher = useFetcher();
 
   const handleMenu = (e) => {
     setAnchorElmt(e.currentTarget);
   }
 
-  const handleClose = (e) => {
+  const handleProfile = (e) => {
     setAnchorElmt(null);
+    navigate("/profile");
   }
 
   const handleLogout = (e) => {
     setAnchorElmt(null);
-    auth.logout();
+    fetcher.submit({idle: true}, {method: "post", action: "/account/logout"});
   }
 
   menuProps = {
@@ -36,7 +38,7 @@ export default function ProfileMenu ({ menuProps }) {
       horizontal: 'right'
     },
     open: Boolean(anchorElmt),
-    onClose: handleClose,
+    onClose: (e) => setAnchorElmt(null),
 
   }
 
@@ -52,7 +54,7 @@ export default function ProfileMenu ({ menuProps }) {
         </IconButton>
       </Tooltip>
       <Menu {...menuProps}>
-        <MenuItem onClick={handleClose /*TODO use Context to pass user ID */}>Profile</MenuItem>
+        <MenuItem onClick={handleProfile}>Profile</MenuItem>
         <MenuItem onClick={handleLogout}>Logout</MenuItem>
       </Menu>
     </div>

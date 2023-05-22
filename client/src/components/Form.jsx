@@ -11,6 +11,7 @@ export default function Form({
   reactForm = false,
   onChange = (e) => {},
   onSubmit = null,
+  onError = null,
   toApi = true,
   BoxProps,
 }) {
@@ -28,6 +29,7 @@ export default function Form({
     <Box
       component={FormBase}
       onSubmit={onSubmit}
+      onError={onError}
       toApi={toApi}
       reactForm={reactForm}
       onChange={onChange}
@@ -40,5 +42,5 @@ export default function Form({
 }
 
 export { createFormData } from "./FormBase";
-export { default as ValidatedInput } from "./ValidatedInput";
+export { default as ValidatedInput, validators } from "./ValidatedInput";
 export { FormBase }

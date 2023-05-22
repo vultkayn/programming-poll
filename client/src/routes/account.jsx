@@ -1,51 +1,40 @@
-import React, { useContext } from "react";
-import Form, { ValidatedInput, createFormData } from "../components/Form";
-import { Link, useActionData } from "react-router-dom";
+import React, { useState } from "react";
+import Form, {
+  ValidatedInput,
+  createFormData,
+  validators,
+} from "../components/Form";
+import { Link } from "react-router-dom";
 import { Button, Box } from "@mui/material";
-import AuthContext from "../bridge/AuthProvider";
-
-let passwordStrengthValidator = (name, value, setMsg) => {
-  let passwordSymbolsClass = "%/_+&!:-(){}.?";
-  if (value.match(/[A-Z]/).length < 1) {
-    setMsg("Must be longer than 8 characters");
-    return false;
-  }
-  if (value.match(/[A-Z]/).length < 1) {
-    setMsg("Must contain at least one uppercase");
-    return false;
-  }
-  if (value.match(/[a-z]/).length < 1) {
-    setMsg("Must contain at least one lowercase");
-    return false;
-  }
-  if (value.match(/[0-9]/).length < 1) {
-    setMsg("Must contain at least one number");
-    return false;
-  }
-  if (value.match(/[%/_+&!:\-.?]/).length < 1) {
-    setMsg(`Must contain at least one of ${passwordSymbolsClass}`);
-    return false;
-  }
-  if (!/[A-Za-z0-9%/_+&!:\-.?]{8,}/.test(value)) {
-    setMsg("Contains invalid characters.");
-    return false;
-  }
-  return true;
-};
-
-let emailValidator = (name, value) => {
-  let regex =
-    /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/;
-  return regex.test(value);
-};
+import useAuth from "../bridge/AuthProvider";
 
 export function SignupPage() {
-  const auth = useContext(AuthContext);
-  const errors = useActionData();
+  const auth = useAuth();
+  const [valids, setValids] = useState({
+    univID: true,
+    password: true,
+    firstName: true,
+    lastName: true,
+    email: true,
+    promo: true,
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    auth.signup(createFormData(e));
+    return auth.signup(createFormData(e));
+  };
+
+  const handleError = (err) => {
+    if (err.status == 401 && err.data.errors) {
+      setValids({
+        univID: !("univID" in err.data.errors),
+        password: !("password" in err.data.errors),
+        firstName: !("firstName" in err.data.errors),
+        lastName: !("lastName" in err.data.errors),
+        email: !("email" in err.data.errors),
+        promo: !("promo" in err.data.errors),
+      });
+    }
   };
 
   return (
@@ -59,47 +48,53 @@ export function SignupPage() {
       </Button>
       <Form
         method='post'
-        reactForm={true}
+        reactForm={false}
         endpoint='/api/auth/'
         id='Signup-form'
-        onSubmit={handleSubmit}>
+        onSubmit={handleSubmit}
+        onError={handleError}>
         <ValidatedInput
           label='UnivID:'
           name='univID'
-          validator={(name, value) => value.length > 1}
+          valid={valids.univID}
+          validator={validators.length(1, 20)}
         />
         <ValidatedInput
           label='Password:'
           name='password'
           type='password'
-          validator={passwordStrengthValidator}
+          valid={valids.password}
+          validator={validators.password}
         />
         <ValidatedInput
           label='First Name:'
           name='firstName'
-          validator={(n, v) => v.length > 1 && v.length < 15}
+          valid={valids.firstName}
+          validator={validators.length(1, 15)}
         />
         <ValidatedInput
           label='Last Name:'
           name='lastName'
-          validator={(n, v) => v.length > 1 && v.length < 15}
+          valid={valids.lastName}
+          validator={validators.length(1, 15)}
         />
         <ValidatedInput
           label='Email:'
           name='email'
           type='email'
-          validator={emailValidator}
+          valid={valids.email}
+          validator={validators.email}
         />
         <ValidatedInput
           label='Promo:'
           name='promo'
           type='text'
-          validator={
-            (n, v, setMsg) =>
-              (/[0-9]{4}/.test(v) &&
-                parseInt(v) >= 1990 &&
-                parseInt(v) <= 2100) ||
-              (setMsg("Promotion should be between 1990 and 2100") && false) // BUG potential bug here ?
+          valid={valids.promo}
+          validator={(n, v, setMsg) =>
+            (/[0-9]{4}/.test(v) &&
+              parseInt(v) >= 1990 &&
+              parseInt(v) <= 2100) ||
+            (setMsg("Promotion should be between 1990 and 2100") && false)
           }
           inputProps={{ inputMode: "numeric", pattern: "[0-9]{4}" }}
         />
@@ -115,13 +110,24 @@ export function SignupPage() {
 }
 
 export function LoginPage() {
-  const auth = useContext(AuthContext);
-  const errors = useActionData();
-  // TODO update form to use AuthProvider Context ?
+  const auth = useAuth();
+  const [valids, setValids] = useState({
+    univID: true,
+    password: true,
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    auth.login(createFormData(e));
+    return auth.login(createFormData(e));
+  };
+
+  const handleError = (err) => {
+    if (err.status == 401 && err.data.errors !== undefined) {
+      setValids({
+        univID: !("univID" in err.data.errors),
+        password: !("password" in err.data.errors),
+      });
+    }
   };
 
   return (
@@ -139,23 +145,26 @@ export function LoginPage() {
 
       <Form
         method='post'
-        reactForm={true}
+        reactForm={false}
         endpoint='/api/auth/login'
         id='Login-form'
-        onSubmit={handleSubmit}>
+        onSubmit={handleSubmit}
+        onError={handleError}>
         <ValidatedInput
           label='UnivID:'
           name='univID'
-          validator={(name, value) => value.length > 1}
+          validator={validators.length(1, 20)}
           margin='normal'
+          valid={valids.univID}
           fullWidth
         />
         <ValidatedInput
           label='Password:'
           name='password'
           type='password'
-          validator={(name, value) => value.length > 1}
+          validator={validators.length(1, 30)}
           margin='normal'
+          valid={valids.password}
           fullWidth
         />
         <Box justifySelf='right'>

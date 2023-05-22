@@ -1,9 +1,16 @@
 import debug from "debug";
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { redirect } from "react-router-dom";
 
-const AuthContext = React.createContext(null);
-export default AuthContext;
+const AuthContext = React.createContext({
+  identity: {},
+  login: (formData) => {},
+  logout: () => {},
+  signup: (formData) => {},
+  update: ({ request, params }) => {},
+  get: ({ params }) => {},
+  logged: () => {},
+});
 
 function handleRedirect(error, codes = [301, 302, 303]) {
   if (codes.includes(error.response.status)) {
@@ -17,6 +24,7 @@ function handleRedirect(error, codes = [301, 302, 303]) {
 }
 
 export function AuthProvider({ children, apiClient }) {
+  const [authenticated, setAuthenticated] = React.useState(false);
   const [identity, setIdentity] = React.useState({});
 
   useEffect(() => {
@@ -47,17 +55,25 @@ export function AuthProvider({ children, apiClient }) {
   }, [apiClient]);
 
   // Action of /account/login
-  async function login({ request, params }) {
+  async function login(formData) {
     try {
       setIdentity({});
-      const formData = await request.formData();
       const body = Object.fromEntries(formData);
       const response = await apiClient.post("/api/auth/login", body);
+      setAuthenticated(true);
       return response.data;
     } catch (error) {
-      debug("bta-poll-client:auth")("AuthProvider::login failed with", error);
-      console.error("AuthProvider::login failed with", error);
-      return error.response.data; // FIXME report error type.
+      /*       if (err.response.status == 401 && err.response.data.errors) {
+        return {errors: {
+          univID: !("univID" in err.data.errors),
+          password: !("password" in err.data.errors),
+          firstName: !("firstName" in err.data.errors),
+          lastName: !("lastName" in err.data.errors),
+          email: !("email" in err.data.errors),
+          promo: !("promo" in err.data.errors),
+        }};
+      } */
+      return error.response.data;
     }
   }
 
@@ -65,31 +81,31 @@ export function AuthProvider({ children, apiClient }) {
     try {
       const response = await apiClient.get("/api/auth/logout");
       setIdentity({});
-      return handleRedirect({ response: response });
+      setAuthenticated(false);
+      return response.data;
     } catch (error) {
       const redirect = handleRedirect(error);
       if (redirect !== false) return redirect;
 
       debug("bta-poll-client:auth")("AuthProvider::logout failed with", error);
-      return error.response.data;
+      return error.response;
     }
   }
 
   // Action of /account/signup
-  async function signup({ request, params }) {
+  async function signup(formData) {
     try {
       setIdentity({});
-      const formData = await request.formData();
       const userInfos = Object.fromEntries(formData);
       const response = await apiClient.post("/api/auth", userInfos);
       return response.data;
     } catch (error) {
       debug("bta-poll-client:auth")("AuthProvider::signup failed with", error);
-      return error.response.data;
+      return error.response;
     }
   }
 
-  async function get() {
+  async function get({ params }) {
     try {
       const response = await apiClient.get("/api/users");
       return response.data;
@@ -98,12 +114,12 @@ export function AuthProvider({ children, apiClient }) {
       if (redirect !== false) return redirect;
 
       debug("bta-poll-client:auth")("AuthProvider::get failed with", error);
-      return error.response.data;
+      return error.response;
     }
   }
 
   // Action of /profile
-  async function update({request, params}) {
+  async function update({ request, params }) {
     try {
       const formData = await request.formData();
       const updates = Object.fromEntries(formData);
@@ -114,15 +130,13 @@ export function AuthProvider({ children, apiClient }) {
       if (redirect !== false) return redirect;
 
       debug("bta-poll-client:auth")("AuthProvider::update failed with", error);
-      return error.response.data;
+      return error.response;
     }
   }
 
   function logged() {
-    return (
-      identity !== null &&
-      ("univID" in identity || "id" in identity || "email" in identity)
-    );
+    console.log("ident", identity);
+    return authenticated;
   }
 
   const context = {
@@ -139,4 +153,8 @@ export function AuthProvider({ children, apiClient }) {
   return (
     <AuthContext.Provider value={context}>{children}</AuthContext.Provider>
   );
+}
+
+export default function useAuth() {
+  return useContext(AuthContext);
 }

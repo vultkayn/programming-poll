@@ -1,6 +1,3 @@
-- BUG fix form submission to the server using actions (formtype = ReactForm)
-- fix client side navigation for the actions apiClient.login and apiClient.update
-- on logout, should navigate to the home page.
 - use useNavigation in forms to handle errors from the action button, if there was no redirect.
   especially for signup / login forms, as well as profile edit
 

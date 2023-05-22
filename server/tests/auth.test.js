@@ -14,7 +14,7 @@ describe('POST /login - Log in account', () => {
             .set('Accept', 'application/json')
             .send({"password": "tooFaitdukayak2!", "univID": "benpr438"})
             .expect('Content-Type', /json/)
-            .expect(401, {errors:{message: "wrong password"}})
+            .expect(401, {errors:{password: "wrong password"}})
     })
 
     test('user not found', async () => {
@@ -24,7 +24,7 @@ describe('POST /login - Log in account', () => {
             .set('Accept', 'application/json')
             .send({"password": "nomatter", "univID": "notexisting"})
             .expect('Content-Type', /json/)
-            .expect(401, {errors:{message: "user not found"}})
+            .expect(401, {errors:{univID: "user not found"}})
     })
 
     test('Successful login - univID', async () => {
@@ -122,7 +122,7 @@ describe('POST / - Create account', () => {
             .set('Accept', 'application/json')
             .send({...payload, email: "doesnt@gmail.com"})
             .expect('Content-Type', /json/)
-            .expect(400, {errors:{message: "user already exists"}})
+            .expect(400, {errors:{univID: "user already exists"}})
     })
 
     test('user already exists - email', async () => {
@@ -135,7 +135,7 @@ describe('POST / - Create account', () => {
                 univID: "doesnt"
             })
             .expect('Content-Type', /json/)
-            .expect(400, {errors:{message: "user already exists"}})
+            .expect(400, {errors:{univID: "user already exists"}})
     })
 
     describe('Sanitization', () => {

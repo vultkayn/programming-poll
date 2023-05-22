@@ -1,12 +1,12 @@
-import React, { useContext, useState } from "react";
+import React, {  useState } from "react";
 import Scaffold from "../components/Scaffold";
 import { AppBar, Toolbar, Typography, Button, Tabs, Tab } from "@mui/material";
 import { NavLink } from "react-router-dom";
 import ProfileMenu from "../components/ProfileMenu";
-import AuthContext from "../bridge/AuthProvider";
+import useAuth from "../bridge/AuthProvider";
 
 export default function Root() {
-  const auth = useContext(AuthContext);
+  const auth = useAuth();
   const [value, setValue] = useState("1");
   let appbar = (
     <AppBar
@@ -50,6 +50,7 @@ export default function Root() {
         ) : (
           <Button
             color='inherit'
+            height='minHeight'
             component={NavLink}
             to='/account/login'>
             Login

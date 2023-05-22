@@ -17,28 +17,30 @@ function handleAccessFailure (err, req, res, next)
 
 exports.handleAccessFailure = handleAccessFailure;
 
-exports.checkAuth = ({ onFailure, onSuccess } = {}) =>
+exports.checkAuth = ({ onFailure = handleAccessFailure, onSuccess } = {}) =>
   function (req, res, next)
   {
     if (typeof (onFailure) !== "function") onFailure = handleAccessFailure;
     if (typeof (onSuccess) !== "function") onSuccess = (req, res, next) => next();
     debug('in checkAuth\n: req.user is',
       req.user,
-      'session is',
+      '\nsession is',
       req.session,
-      'Headers are:',
+      '\nHeaders are:',
       req.headers);
-    if (!req.user) return onFailure({ status: 401, message: "not logged in" }, req, res, next);
+    if (!req.user) return debug("user was not logged") || onFailure({ status: 401, message: "not logged in" }, req, res, next);
     if (req.body.univID && req.body.univID !== req.user.univID
-      || req.body.id && req.body.id !== req.user.id)
-      return onFailure({ status: 401, message: "not logged in" }, req, res, next);
+      || req.body.id && req.body.id !== req.user.id) {
+        debug("user was logged but identifiers didnt match");
+        return onFailure({ status: 401, message: "not logged in" }, req, res, next);
+      }
     return onSuccess(res, res, next);
   };
 
 exports.checkAuthAs = (
   { univID,
     id,
-    onFailure = (err, req, res, next) => { },
+    onFailure = handleAccessFailure,
     onSuccess = (req, res, next) => { }
   } = { univID: null, id: null }) =>
   function (req, res, next)
@@ -61,7 +63,7 @@ const passportCall = (name) => (err, req, res, next) =>
     debug("In authenticate", name);
     let errors;
     if (err) errors = err;
-    else if (!user) errors = { status: info.status, errors: { message: info.message || info } };
+    else if (!user) errors = { status: info.status, errors: info.errors || info };
 
     if (errors) {
       debug("authenticate: errors", errors);

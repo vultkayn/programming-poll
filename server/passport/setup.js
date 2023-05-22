@@ -6,14 +6,14 @@ const debug = require("debug");
 
 
 passport.serializeUser(function (user, done) {
-  debug("bta-poll-server:session")('serializer')
-  debug("bta-poll-server:verbose:session")(`serialized ${user}`);
+  debug("session")('serializer')
+  debug("verbose:session")(`serialized ${user}`);
   return done(null, { id: user.id, univID: user.identity.univID });
 });
 
 passport.deserializeUser(function (user, done) {
-  debug("bta-poll-server:session")('deserializer', user);
-  debug("bta-poll-server:verbose:session")('deserialized', user);
+  debug("session")('deserializer', user);
+  debug("verbose:session")('deserialized', user);
   done(null, user);
 });
 
@@ -62,7 +62,7 @@ passport.use('login', new LocalStrategy({
       .then(user => {
         // no such user, create it.
         if (!user) {
-          return done(null, false, { status: 401, message: "user not found" });
+          return done(null, false, { status: 401, errors: { univID: "user not found" }});
         } else {
           // user was found
           return bcrypt.compare(password, user.identity.password)
@@ -71,7 +71,7 @@ passport.use('login', new LocalStrategy({
               {
                 return done(null, user);
               }
-              return done(null, false, { status: 401, message: "wrong password" });
+              return done(null, false, { status: 401, errors: { password: "wrong password" }});
             });
         }
       })
@@ -102,7 +102,7 @@ passport.use('signup',
               });
           } else {
             // user was found
-            return done(null, false, { status: 400, message: "user already exists" });
+            return done(null, false, { status: 400, errors: {univID: "user already exists" }});
           }
         })
         .catch(err => {

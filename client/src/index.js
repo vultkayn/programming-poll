@@ -9,56 +9,68 @@ import "./index.css";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { createApiClient } from "./bridge/bridge";
-import { AuthProvider } from "./bridge/AuthProvider";
+import useAuth, { AuthProvider } from "./bridge/AuthProvider";
 
 const apiClient = createApiClient();
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: (
-      <AuthProvider apiClient={apiClient}>
-        <Root />
-      </AuthProvider>
-    ),
-    errorElement: <ErrorPage />,
-    children: [
-      {
-        errorElement: <ErrorPage />,
-        children: [
-          {
-            index: true,
-            element: <Home />,
-          },
-          {
-            path: "account/login",
-            element: <LoginPage />,
-            action: apiClient.login,
-          },
-          {
-            path: "account/signup/",
-            element: <SignupPage />,
-            action: apiClient.signup,
-          },
-          {
-            path: "account/logout",
-            loader: apiClient.logout,
-          },
-          {
-            path: "profile/",
-            element: <ProfilePage />,
-          },
-          {
-            path: "profile/edit",
-            element: <EditProfilePage />,
-          },
-        ],
-      },
-    ],
-  },
-]);
+const router = (authContext) =>
+  createBrowserRouter([
+    {
+      path: "/",
+      element: <Root />,
+      errorElement: <ErrorPage />,
+      children: [
+        {
+          errorElement: <ErrorPage />,
+          children: [
+            {
+              index: true,
+              element: <Home />,
+            },
+            {
+              path: "account/login",
+              element: <LoginPage />,
+            },
+            {
+              path: "account/signup/",
+              element: <SignupPage />,
+            },
+            {
+              path: "account/logout",
+              action: authContext.logout,
+            },
+            {
+              path: "profile/",
+              loader: authContext.get,
+              element: (
+                <ProfilePage />
+              ),
+              children: [
+                {
+                  path: "edit/",
+                  action: authContext.update,
+                  element: (
+                    <EditProfilePage />
+                  ),
+                },
+              ]
+            },
+          ],
+        },
+      ],
+    },
+  ]);
+
+function RenderRoot() {
+  const auth = useAuth();
+  return (
+      <RouterProvider router={router(auth)} />
+  );
+}
 
 ReactDOM.render(
-  <RouterProvider router={router} />,
+  <AuthProvider apiClient={apiClient}>
+    <RenderRoot/>
+  </AuthProvider>,
   document.getElementById("root")
 );
