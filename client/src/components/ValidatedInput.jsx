@@ -12,8 +12,6 @@ export default function ValidatedInput({
   validator = (name, value, setMsg) => true,
   label = "",
   type = "text",
-  variant = "outlined",
-  color = "primary",
   helperText = "",
   required = true,
   valid = true,
@@ -32,7 +30,7 @@ export default function ValidatedInput({
       invalid ||
       validator(e.target.name, e.target.value, setInvalidTxt) === false;
     setIsInvalid(invalid);
-    helperText = isInvalid && invalidTxt ? invalidTxt : helperText;
+    helperText = (isInvalid && invalidTxt) ? invalidTxt : helperText;
   }
 
   return (

@@ -1,24 +1,76 @@
-import React, {  useState } from "react";
+import React, { useEffect, useState } from "react";
 import Scaffold from "../components/Scaffold";
-import { AppBar, Toolbar, Typography, Button, Tabs, Tab } from "@mui/material";
+import { AppBar, Toolbar, Typography, Button } from "@mui/material";
 import { NavLink } from "react-router-dom";
 import ProfileMenu from "../components/ProfileMenu";
 import useAuth from "../bridge/AuthProvider";
+import Navbar from "../components/Navbar";
+
+const TABS = [
+  {
+    authRequired: false,
+    authStrict: false,
+    key: "1",
+    props: {
+      value: "1",
+      label: "Practice",
+      to: "/exercises",
+    },
+  },
+  {
+    authRequired: false,
+    authStrict: false,
+    key: "2",
+    props: {
+      value: "2",
+      label: "Stats",
+      to: "/stats",
+    },
+  },
+  {
+    authRequired: true,
+    authStrict: true,
+    key: "3",
+    props: {
+      value: "3",
+      label: "Discussion",
+      to: "/chat",
+    },
+  },
+];
 
 export default function Root() {
-  const auth = useAuth();
-  const [value, setValue] = useState("1");
+  const auth = useAuth(); // useContext(AuthenticationContext)
+  const [logged, setLogged] = useState(null);
+  useEffect(() => {
+    async function pingUser() {
+      await auth.get();
+      setLogged(auth.logged());
+    }
+    pingUser();
+    return () => {};
+  }, []); // first time only
+
+  if (logged == null) return null;
+
+  console.log("Root: logged is", auth.logged());
+
+  let tabs = TABS.filter(
+    (tab) =>
+      (tab.authRequired && auth.logged()) ||
+      (!tab.authRequired && !auth.logged()) ||
+      (!tab.authRequired && auth.logged() && !tab.authStrict)
+  );
+
   let appbar = (
     <AppBar
       position='static'
       color='primary'
       sx={{
-        mb: 2
+        mb: 2,
       }}>
       <Toolbar>
-        <NavLink
-          to='/'
-        >
+        <NavLink to='/'>
           <Typography
             variant='h4'
             component='div'
@@ -27,23 +79,17 @@ export default function Root() {
           </Typography>
         </NavLink>
 
-        <Tabs
-          value={value}
+        <Navbar
           textColor='inherit'
           indicatorColor='white'
-          onChange={(e, newValue) => setValue(newValue)}
-          sx={{
-            width: "100%",
+          BoxProps={{
+            sx: {
+              width: "100%",
+            },
           }}
-          centered>
-          <Tab
-            key='1'
-            value='1'
-            label='Practice'
-            component={NavLink}
-            to='/exercises'
-          />
-        </Tabs>
+          tabs={tabs}
+          centered
+        />
 
         {auth.logged() ? (
           <ProfileMenu />

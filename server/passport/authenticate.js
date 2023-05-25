@@ -1,6 +1,6 @@
 const { body, oneOf } = require('express-validator');
 
-const debug = require("debug")("bta-poll-server:auth");
+const debug = require("debug")("server:auth");
 
 const passport = require("passport");
 const { validateSanitization } = require('../sanitizers');
@@ -34,7 +34,7 @@ exports.checkAuth = ({ onFailure = handleAccessFailure, onSuccess } = {}) =>
         debug("user was logged but identifiers didnt match");
         return onFailure({ status: 401, message: "not logged in" }, req, res, next);
       }
-    return onSuccess(res, res, next);
+    return onSuccess(req, res, next);
   };
 
 exports.checkAuthAs = (
@@ -93,7 +93,6 @@ exports.connexion = [
   {
     if (req.body.univID === undefined)
       req.body.univID = "noneProvided";
-    debug("create univID if missing");
     next();
   },
   this.checkAuth({

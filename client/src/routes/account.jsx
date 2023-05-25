@@ -4,7 +4,7 @@ import Form, {
   createFormData,
   validators,
 } from "../components/Form";
-import { Link } from "react-router-dom";
+import { Link, useActionData, useNavigate } from "react-router-dom";
 import { Button, Box } from "@mui/material";
 import useAuth from "../bridge/AuthProvider";
 
@@ -110,25 +110,26 @@ export function SignupPage() {
 }
 
 export function LoginPage() {
-  const auth = useAuth();
   const [valids, setValids] = useState({
     univID: true,
     password: true,
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    return auth.login(createFormData(e));
-  };
+  const logged = useAuth().logged();
+  const err = useActionData();
+  const navigate = useNavigate();
 
-  const handleError = (err) => {
+  console.log("logged is", logged, "err are", err);
+  if (logged) navigate("/", { replace: true });
+
+  if (err !== undefined) {
     if (err.status == 401 && err.data.errors !== undefined) {
       setValids({
         univID: !("univID" in err.data.errors),
         password: !("password" in err.data.errors),
       });
     }
-  };
+  }
 
   return (
     <Box
@@ -145,11 +146,8 @@ export function LoginPage() {
 
       <Form
         method='post'
-        reactForm={false}
-        endpoint='/api/auth/login'
-        id='Login-form'
-        onSubmit={handleSubmit}
-        onError={handleError}>
+        reactForm={true}
+        id='Login-form'>
         <ValidatedInput
           label='UnivID:'
           name='univID'

@@ -78,6 +78,7 @@ export default function FormBase({
   const handleSubmit = (submitHandler, errHandler) => async (e) => {
     try {
       const response = await submitHandler(e);
+      console.log("response is", response);
     } catch (err) {
       errHandler(err);
     }

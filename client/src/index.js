@@ -1,4 +1,4 @@
-import React from "react";
+import React, { StrictMode } from "react";
 import ReactDOM from "react-dom";
 import Root from "./routes/root";
 import ErrorPage from "./routes/error-page";
@@ -10,6 +10,8 @@ import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { createApiClient } from "./bridge/bridge";
 import useAuth, { AuthProvider } from "./bridge/AuthProvider";
+import CategoriesListingPage from "./routes/exercices"
+import ChatRoomPage from "./routes/chat";
 
 const apiClient = createApiClient();
 
@@ -29,6 +31,7 @@ const router = (authContext) =>
             },
             {
               path: "account/login",
+              action: authContext.login,
               element: <LoginPage />,
             },
             {
@@ -41,6 +44,7 @@ const router = (authContext) =>
             },
             {
               path: "profile/",
+              id: "profile",
               loader: authContext.get,
               element: (
                 <ProfilePage />
@@ -55,6 +59,18 @@ const router = (authContext) =>
                 },
               ]
             },
+            {
+              path: "exercises/",
+              element: (
+                <CategoriesListingPage />
+              )
+            },
+            {
+              path: "chat/",
+              element: (
+                <ChatRoomPage />
+              )
+            }
           ],
         },
       ],
@@ -69,8 +85,10 @@ function RenderRoot() {
 }
 
 ReactDOM.render(
+  <StrictMode>
   <AuthProvider apiClient={apiClient}>
     <RenderRoot/>
-  </AuthProvider>,
+  </AuthProvider>
+  </StrictMode>,
   document.getElementById("root")
 );

@@ -6,7 +6,7 @@ const password = encodeURIComponent(process.env.MONGO_DB_PASS);
 const mongoDBURL = `mongodb+srv://${username}:<password>@cluster0.mug6fr1.mongodb.net/?retryWrites=true&w=majority`;
 const mongoDBURL_priv = `mongodb+srv://${username}:${password}@cluster0.mug6fr1.mongodb.net/?retryWrites=true&w=majority`;
 
-const debug = require('debug')('bta-poll-server:server')
+const debug = require('debug')('server:server')
 
 console.log(process.env.NODE_ENV);
 

@@ -4,11 +4,11 @@ import { redirect } from "react-router-dom";
 
 const AuthContext = React.createContext({
   identity: {},
-  login: (formData) => {},
-  logout: () => {},
-  signup: (formData) => {},
-  update: ({ request, params }) => {},
-  get: ({ params }) => {},
+  login: async (formData) => {},
+  logout: async () => {},
+  signup: async (formData) => {},
+  update: async ({ request, params }) => {},
+  get: async ({ params }) => {},
   logged: () => {},
 });
 
@@ -17,6 +17,7 @@ function handleRedirect(error, codes = [301, 302, 303]) {
     console.log("status included error res is: ", error.response);
     // FIXME improve security check of redirection message
     if (error.response.data !== "" && error.response.data[0] === "/") {
+      // BUG potential XSS
       return redirect(error.response.data);
     }
   }
@@ -24,8 +25,12 @@ function handleRedirect(error, codes = [301, 302, 303]) {
 }
 
 export function AuthProvider({ children, apiClient }) {
-  const [authenticated, setAuthenticated] = React.useState(false);
   const [identity, setIdentity] = React.useState({});
+
+  useEffect(() => {
+    console.log("provider: identity is", identity);
+    return () => {};
+  }, [identity]);
 
   useEffect(() => {
     const requestInterceptor = apiClient.interceptors.request.use((config) => {
@@ -38,42 +43,47 @@ export function AuthProvider({ children, apiClient }) {
     });
 
     const responseInterceptor = apiClient.interceptors.response.use((res) => {
-      if (res.data && res.status >= 200 && res.status < 300) {
-        if ("univID" in res.data)
-          setIdentity({ ...identity, univID: res.data.univID });
-        if ("email" in res.data)
-          setIdentity({ ...identity, email: res.data.email });
-        if ("id" in res.data) setIdentity({ ...identity, id: res.data.id });
-      }
+      let newIdentity = {};
+
+      if ("univID" in res.data) newIdentity.univID = res.data.univID;
+      if ("email" in res.data) newIdentity.email = res.data.email;
+      if ("id" in res.data) newIdentity.id = res.data.id;
+
+      setIdentity({ ...identity, ...newIdentity });
       return res;
+    },
+    (err) => {
+      if (err.status == 304) {
+        console.log("interceptors 304");
+        let newIdentity = {};
+
+        if ("univID" in err.data) newIdentity.univID = err.data.univID;
+        if ("email" in err.data) newIdentity.email = err.data.email;
+        if ("id" in err.data) newIdentity.id = err.data.id;
+  
+        setIdentity({ ...identity, ...newIdentity });
+        return err;
+      }
+      return err;
     });
 
     return () => {
+      console.error("Ejecting intercepts");
       apiClient.interceptors.request.eject(requestInterceptor);
       apiClient.interceptors.response.eject(responseInterceptor);
     };
   }, [apiClient]);
 
-  // Action of /account/login
-  async function login(formData) {
+  // Action of /account/login 
+  async function login({ request, params }) {
     try {
       setIdentity({});
+      const formData = await request.formData();
       const body = Object.fromEntries(formData);
-      const response = await apiClient.post("/api/auth/login", body);
-      setAuthenticated(true);
-      return response.data;
+      await apiClient.post("/api/auth/login", body);
+      return redirect("/");
     } catch (error) {
-      /*       if (err.response.status == 401 && err.response.data.errors) {
-        return {errors: {
-          univID: !("univID" in err.data.errors),
-          password: !("password" in err.data.errors),
-          firstName: !("firstName" in err.data.errors),
-          lastName: !("lastName" in err.data.errors),
-          email: !("email" in err.data.errors),
-          promo: !("promo" in err.data.errors),
-        }};
-      } */
-      return error.response.data;
+      return error.response;
     }
   }
 
@@ -81,13 +91,12 @@ export function AuthProvider({ children, apiClient }) {
     try {
       const response = await apiClient.get("/api/auth/logout");
       setIdentity({});
-      setAuthenticated(false);
       return response.data;
     } catch (error) {
       const redirect = handleRedirect(error);
       if (redirect !== false) return redirect;
 
-      debug("bta-poll-client:auth")("AuthProvider::logout failed with", error);
+      debug("client:auth")("AuthProvider::logout failed with", error);
       return error.response;
     }
   }
@@ -100,12 +109,12 @@ export function AuthProvider({ children, apiClient }) {
       const response = await apiClient.post("/api/auth", userInfos);
       return response.data;
     } catch (error) {
-      debug("bta-poll-client:auth")("AuthProvider::signup failed with", error);
+      debug("client:auth")("AuthProvider::signup failed with", error);
       return error.response;
     }
   }
 
-  async function get({ params }) {
+  async function get() {
     try {
       const response = await apiClient.get("/api/users");
       return response.data;
@@ -113,30 +122,29 @@ export function AuthProvider({ children, apiClient }) {
       const redirect = handleRedirect(error);
       if (redirect !== false) return redirect;
 
-      debug("bta-poll-client:auth")("AuthProvider::get failed with", error);
+      debug("client:auth")("AuthProvider::get failed with", error);
       return error.response;
     }
   }
 
-  // Action of /profile
+  // Action of /profile/edit
   async function update({ request, params }) {
     try {
       const formData = await request.formData();
       const updates = Object.fromEntries(formData);
-      const response = await apiClient.put("/api/users", updates);
-      return response.data;
+      await apiClient.put("/api/users", updates);
+      return redirect("/profile");
     } catch (error) {
       let redirect = handleRedirect(error);
       if (redirect !== false) return redirect;
 
-      debug("bta-poll-client:auth")("AuthProvider::update failed with", error);
+      debug("client:auth")("AuthProvider::update failed with", error);
       return error.response;
     }
   }
 
   function logged() {
-    console.log("ident", identity);
-    return authenticated;
+    return "univID" in identity || "email" in identity || "id" in identity;
   }
 
   const context = {

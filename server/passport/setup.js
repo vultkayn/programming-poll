@@ -54,7 +54,7 @@ passport.use('login', new LocalStrategy({
   passReqToCallback: true,
 },
   (req, univID, password, done) => {
-    debug("bta-poll-server:auth")("calling strategy 'login'");
+    debug("server:auth")("calling strategy 'login'");
     let toBeFound = { "identity.univID": univID };
     if (req.body.email !== undefined)
       toBeFound = { "identity.email": req.body.email };
@@ -89,7 +89,7 @@ passport.use('signup',
     passReqToCallback: true,
   },
     (req, univID, password, done) => {
-      debug("bta-poll-server:auth")("calling strategy 'signup'");
+      debug("server:auth")("calling strategy 'signup'");
       User.findOne({ $or: [{ "identity.univID": univID }, { "identity.email": req.body.email }] })
         .then(user => {
           // no such user, create it.
