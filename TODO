@@ -1,6 +1,0 @@
-- use useNavigation in forms to handle errors from the action button, if there was no redirect.
-  especially for signup / login forms, as well as profile edit
-
-- for exercices, when showing all questions for an exercise, save to the database after each question is no longer focused
-  -- however this shouldnt feel like a navigation, so the action should be called using useFetcher.
-
