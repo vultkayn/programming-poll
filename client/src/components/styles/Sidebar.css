@@ -1,0 +1,7 @@
+.Sidebar {
+    scrollbar-width: thin;
+}
+
+.SidebarListing-item {
+    font-size: 1.8rem;
+}

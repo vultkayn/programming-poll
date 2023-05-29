@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 import { Container, Skeleton, Typography, Grid } from "@mui/material";
+import DOMPurify from "dompurify";
 
 export default function MarkdownReader({ path }) {
   const [done, setDone] = useState(false);
@@ -9,11 +10,11 @@ export default function MarkdownReader({ path }) {
   let html = path.substring(0, path.lastIndexOf(".")) + ".html";
 
   useEffect(() => {
-    console.log("html path:", html);
     async function parse() {
       const fil = await axios.get(html);
+      const purified = await DOMPurify.sanitize(fil.data);
       setDone(true);
-      setFile(fil.data); // FIXME improve with a steam (see axios responseType="stream")
+      setFile(purified); // FIXME improve with a steam (see axios responseType="stream")
     }
     parse();
     return () => {

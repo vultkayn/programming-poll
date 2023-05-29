@@ -10,7 +10,9 @@ import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { createApiClient } from "./bridge/bridge";
 import useAuth, { AuthProvider } from "./bridge/AuthProvider";
-import CategoriesListingPage from "./routes/exercices"
+import CategoriesListingPage from "./routes/practice";
+import CategoryPage from "./components/CategoryPage";
+import ExercisePage from "./components/ExercisePage";
 import ChatRoomPage from "./routes/chat";
 
 const apiClient = createApiClient();
@@ -46,31 +48,38 @@ const router = (authContext) =>
               path: "profile/",
               id: "profile",
               loader: authContext.get,
-              element: (
-                <ProfilePage />
-              ),
+              element: <ProfilePage />,
               children: [
                 {
                   path: "edit/",
                   action: authContext.update,
-                  element: (
-                    <EditProfilePage />
-                  ),
+                  element: <EditProfilePage />,
                 },
-              ]
+              ],
             },
             {
-              path: "exercises/",
-              element: (
-                <CategoriesListingPage />
-              )
+              path: "practice/",
+              element: <CategoriesListingPage />,
+              children: [
+                {
+                  path: ":uri",
+                  children: [
+                    {
+                      index: true,
+                      element: <CategoryPage />,
+                    },
+                    {
+                      path: ":id",
+                      element: <ExercisePage />,
+                    }
+                  ],
+                },
+              ],
             },
             {
               path: "chat/",
-              element: (
-                <ChatRoomPage />
-              )
-            }
+              element: <ChatRoomPage />,
+            },
           ],
         },
       ],
@@ -79,16 +88,14 @@ const router = (authContext) =>
 
 function RenderRoot() {
   const auth = useAuth();
-  return (
-      <RouterProvider router={router(auth)} />
-  );
+  return <RouterProvider router={router(auth)} />;
 }
 
 ReactDOM.render(
   <StrictMode>
-  <AuthProvider apiClient={apiClient}>
-    <RenderRoot/>
-  </AuthProvider>
+    <AuthProvider apiClient={apiClient}>
+      <RenderRoot />
+    </AuthProvider>
   </StrictMode>,
   document.getElementById("root")
 );

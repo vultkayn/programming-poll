@@ -14,7 +14,7 @@ const TABS = [
     props: {
       value: "1",
       label: "Practice",
-      to: "/exercises",
+      to: "/practice",
     },
   },
   {
