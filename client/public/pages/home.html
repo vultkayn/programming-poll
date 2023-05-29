@@ -1,0 +1,41 @@
+<h1>BTA [beta version]</h1>
+<p>An enthusiastic attempt to develop a language to teach core programming concepts, without taking people for betas.</p>
+<h3>What's currently done</h3>
+<p>Learning tools are few and far between, and so often either too narrow-focused (OOP with ), or too shallow (Scratch). Python was often introduced as a learning language, as its syntax is easy to learn, the interpreter is highly permissive and the dynamic typing greatly takes a heavy weight off the beginner.
+However, this does not help the programmer in the long term, as the learner won't have the opportunity to meet their first SEGFAULT, neither will they learn anything about the lower-level mecanism, such as memory management.</p>
+<p>In multiple curriculum, Python is used as an introduction to procedural programmation and to algorithmic, to later fall back onto a more 'demanding' language, such as C or C++, to introduce memory management.</p>
+<p>A language that should not be as laid-back as Python is while not having the syntaxic difficulties of Rust, nor the intricacies of C++.</p>
+<h3>What's BTA is aiming for</h3>
+<p>Not intended to be that great performance-wise (do not use this in production).
+Simply a language for learning purposes, packaged with its own interpreter (written in RUST ? =))</p>
+<p>BTA is aiming to accompany the student through a whole diversity of concepts, such as:</p>
+<ul>
+<li>memory management (malloc/free)</li>
+<li>pointers and references, no untracked dangling pointers</li>
+<li>types awareness (and casting)</li>
+<li>types common qualifiers, such as constness</li>
+<li>dynamic typing on explicit demand.</li>
+<li>stack frames and scopes</li>
+<li>garbage collection</li>
+<li>debugging</li>
+<li>function overloading</li>
+<li>arrays and vectors</li>
+<li>(maybe oop ?)</li>
+</ul>
+<h2>Core functionalities</h2>
+<ul>
+<li>Interpreted language with garbage collection</li>
+<li>All cast must be explicit</li>
+<li>Lightweight syntax</li>
+<li>Static typing by default, but a variable can be dynamic if requested.</li>
+<li>Variables, scopes can be tagged as 'not garbage collected', thus manually managed.</li>
+<li>Any memory leak is to be reported to the user, with a helpful explanation as to how and why this happened</li>
+<li>No <code>undefined</code> or <code>null</code> variables.</li>
+<li>Distinction between parameters <code>by value</code> and <code>by reference</code></li>
+<li>Built-in support of smart pointers, with a redesigned syntax.</li>
+<li>Built-in support of <code>key-associative</code> and <code>index-associative</code> collections</li>
+<li>Built-in visualisation of memory leak tracing, function call graph, and abstraction of the stack and heap.</li>
+<li>Strict 'compiling', all warnings are errors. To the beginner, warnings are just noisy, easy-to-ignore yellow lines that sometimes appear for no apparent reason.</li>
+<li>Enforce the programmer to abide by their coding style. <code>style: snake_case, camelCase or PascalCase</code></li>
+<li>Built-in unitary testing ?</li>
+</ul>
