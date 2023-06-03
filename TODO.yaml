@@ -19,10 +19,16 @@ server:
   - GET /practice/categories: list all categories
   - GET /practice/category/:path:
       - returns a list [subcategories, exercises] of the given category
-  - GET /practice/exercice/:path:
+  - GET /practice/exercise/:path:
       - returns a name, title, subject, list of questions of the given exercise
-  - POST /practice/exercice/:path/:id:
+  - POST /practice/exercise/:path/:exID/:qID:
       - submit answers for the given question.
+  - POST /practice/exercises/:
+      - create new exercise
+      - path
+      - name
+      - questions
+  - DELETE /practice/exercises/:path/:id: delete the given exercise (by putting dummy exercise data in its place)
 database:
   - Category:
       - unique path
@@ -39,7 +45,7 @@ database:
       - subject
       - language: optional
       - languageContent: optional
-      - (type, text)[] choices: array of choices
+      - (type, arr(name, label)[]) choices: array of choices
       - explanation: explanation in case of failure
       - (value)[] answers: array of expected 'any' value, one per choice.
   - User:
