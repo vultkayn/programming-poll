@@ -1,22 +1,19 @@
 import React, { useEffect } from "react";
-import { useLoaderData, Outlet, Link, useFetcher } from "react-router-dom";
+import { useLoaderData, Outlet, Link as RouterLink } from "react-router-dom";
 import "../components/styles/Sidebar.css";
-import useAuth from "../bridge/AuthProvider";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import Sidebar, { SidebarListing, makeSolvedIcon } from "../components/Sidebar";
 
-import {
-  Box,
-  Divider,
-  List,
-  Chip,
-  ListItemIcon,
-  ListItemButton,
-  Paper,
-  ListItemText,
-  Collapse,
-} from "@mui/material";
+import { Box, Breadcrumbs, Typography, Link as MUILink } from "@mui/material";
 
-function prepareCategoryTarget({ path, name, kind }) {
+/**
+ * @brief Upon creation of an exercise or category,
+ * use the user-friendly formatted path and name to produce a database friendly
+ * path and name.
+ *
+ * @param {string} path path at the format cat1/cat2/.../
+ * @param {int} kind 0 for a category, 1 for an exercise
+ */
+function preparePathForPOST({ path, name, kind }) {
   const formatPath = (path) => {
     const pathBeg = path && path.length > 0 && path[0] === "/" ? 1 : 0;
     const pathEnd = // remove ending separator if any.
@@ -30,124 +27,34 @@ function prepareCategoryTarget({ path, name, kind }) {
       .replaceAll("/", "-");
   };
 
-  const pureName = name.replaceAll(/[^\w ._,+-]/g, "");
-  const pureNameURI = pureName
-    .replaceAll(/[^a-zA-Z0-9-+_ ]/g, "")
-    .replaceAll("-", "_")
-    .replaceAll(" ", "_");
+  const formatNameURI = (filteredName) => {
+    return filteredName
+      .replaceAll(/[^a-zA-Z0-9-+_ ]/g, "")
+      .replaceAll("-", "_")
+      .replaceAll(" ", "_");
+  };
 
-  const uri = formatPath(path);
+  const pureName = name.toLowerCase().replaceAll(/[^\w ._,+-]/g, "");
+  const pureNameURI = formatNameURI(pureName);
+  const uri = formatPath(path.toLowerCase());
 
   let sep = null;
   if (kind === 0) sep = uri.length === 0 /* root? */ ? "" : "-";
   else if (kind === 1) sep = uri.length === 0 /* root? */ ? null : "/"; // no exercises allowed for root, so cannot have empty here
   if (sep === null) sep = ""; //throw new Error(""); // TODO improved the error type
 
-  console.log({ target: uri + sep + pureNameURI, uiName: pureName });
   return { target: uri + sep + pureNameURI, uiName: pureName };
 }
 
-function SidebarListing({
-  title = "",
-  content,
-  onClick = (e, idx) => {},
-  ...ListProps
-}) {
-  const [selectedIndex, setSelectedIndex] = React.useState(-1);
-  const [opened, setOpened] = React.useState(true);
-  const handleClick = (e, idx) => {
-    setSelectedIndex(idx);
-    onClick(e, idx);
-  };
-
-  const handleCollapse = (e) => setOpened(!opened);
-
-  return (
-    <List
-      className='Sidebar-content SidebarListing'
-      style={{ overflow: "auto" }}
-      {...ListProps}>
-      <Divider variant='middle'>
-        {title ? (
-          <Chip
-            label={title}
-            clickable
-            color='secondary'
-            variant={opened ? "outlined" : "filled"}
-            onClick={handleCollapse}
-          />
-        ) : null}
-      </Divider>
-      <Collapse in={opened}>
-        {content.map(({ path, name, solved, kind }, idx) => {
-          const { target, uiName } = prepareCategoryTarget({
-            path,
-            name,
-            kind,
-          });
-
-          return (
-            <ListItemButton
-              component={Link}
-              selected={selectedIndex === idx}
-              onClick={(e) => handleClick(e, idx)}
-              key={target}
-              to={target}>
-              <ListItemText
-                primary={uiName}
-                className='SidebarListing-item'
-                inset
-              />
-              {solved ? (
-                <ListItemIcon>
-                  {" "}
-                  <CheckCircleIcon htmlColor='green' />
-                </ListItemIcon>
-              ) : null}
-            </ListItemButton>
-          );
-        })}
-      </Collapse>
-    </List>
-  );
-}
-
-function Sidebar({ elevation = 1, children, ...BoxProps }) {
-  const props = {
-    height: "100%",
-    flexGrow: "auto",
-    paddingtop: "10px",
-    paddingbot: "10px",
-    overflow: "scroll",
-    scrollbarwidth: "thin",
-    ...BoxProps,
-  };
-
-  return (
-    <Box {...props}>
-      <Paper
-        elevation={elevation}
-        square
-        style={{
-          display: "flex",
-          flexDirection: "column",
-        }}>
-        {children}
-      </Paper>
-    </Box>
-  );
-}
-
 export default function CategoriesListingPage() {
-  // const {currentInfo, subCategories, exercises} = useLoaderData();
-  const [current, setCurrent] = React.useState({
-    kind: 0, // 0 for catgs, 1 for exercises
+  const [breadcrumbs, setBreadcrumbs] = React.useState("");
+  /* {     kind: 0, // 0 for catgs, 1 for exercises
     path: "/", // object path, from root supercategory /.
     solved: false,
-    progress: 4 /*
-    kind==1 then between 0 and questionIDs.length-1
-    kind==0 then between 0 and exercises.length -1
-    */,
+    progress: 4 
+    //kind==1 then between 0 and questionIDs.length-1
+    //kind==0 then between 0 and exercises.length -1
+    ,
 
     // Categories specific infos:
 
@@ -155,39 +62,23 @@ export default function CategoriesListingPage() {
     questionIDs: [], // used to fetch the questions
     nbAttempts: 0,
     lastAttemptDate: "",
-  });
+  }); */
   const [sections, setSections] = React.useState([
-    {
-      title: "Exercises",
-      listing: [
-        { path: "memory/pointers", name: "exo1", solved: false, kind: 1 },
-        { path: "memory-pointers", name: "exo2", solved: false, kind: 1 },
-        { path: "pointers", name: "exo3", solved: false, kind: 1 },
-        { path: "memory", name: "exo4", solved: false, kind: 1 },
-        { path: "c++", name: "exo12", solved: false, kind: 1 },
-        { path: "memory", name: "exercise5", solved: false, kind: 1 },
-        { path: "memory", name: "exo5", solved: false, kind: 1 },
-        { path: "garbage_collector", name: "exo46", solved: false, kind: 1 },
-        { path: "oop", name: "exo6", solved: false, kind: 1 },
-      ],
-    },
     {
       title: "Subcategories",
       listing: [
-        { path: "", name: "pointers", solved: false, kind: 0 }, // FIXME path should include name too, fix above in the functions too
-        { path: "", name: "memory", solved: false, kind: 0 },
-        { path: "", name: "oop", solved: false, kind: 0 },
-        { path: "", name: "garbage collector", solved: false, kind: 0 },
-        { path: "", name: "c", solved: false, kind: 0 },
-        { path: "", name: "c++", solved: false, kind: 0 },
-        { path: "", name: "types", solved: true, kind: 0 },
-        { path: "", name: "pointers", solved: false, kind: 0 },
-        { path: "", name: "memory", solved: false, kind: 0 },
-        { path: "", name: "oop", solved: false, kind: 0 },
-        { path: "", name: "garbage collector", solved: false, kind: 0 },
-        { path: "", name: "c", solved: false, kind: 0 },
-        { path: "", name: "c++", solved: false, kind: 0 },
-        { path: "", name: "types", solved: false, kind: 0 },
+        { path: "pointers", name: "pointers", solved: false, kind: 0 }, // FIXME path should include name too, fix above in the functions too
+        { path: "memory", name: "memory", solved: false, kind: 0 },
+        { path: "oop", name: "oop", solved: false, kind: 0 },
+        {
+          path: "garbage_collector",
+          name: "garbage collector",
+          solved: false,
+          kind: 0,
+        },
+        { path: "c", name: "c", solved: false, kind: 0 },
+        { path: "c++", name: "c++", solved: false, kind: 0 },
+        { path: "types", name: "types", solved: true, kind: 0 },
       ],
     },
   ]);
@@ -203,18 +94,67 @@ export default function CategoriesListingPage() {
           width='15vw'
           maxHeight='90vh'
           fontSize='15px'>
-          {sections.map((section) => {
+          {sections.map((section, idx) => {
             return (
               <SidebarListing
-                key={section.title}
+                key={`${section.title}:${idx}`}
                 content={section.listing}
                 title={section.title}
+                makeIcon={makeSolvedIcon}
+                makeTarget={(v, ) => v.path}
+                inset
               />
             );
           })}
         </Sidebar>
-        <Outlet context={[setCurrent, setSections]} />
+        <Box width='100%'>
+          <Breadcrumbs
+            maxItems={3}
+            sx={{
+              marginBottom: "50px",
+            }}
+            aria-label='breadcrumb'>
+            <MUILink
+              underline='hover'
+              color='inherit'
+              component={RouterLink}
+              onClick={(e) => {setBreadcrumbs("")}}
+              to='/practice'>
+              Index
+            </MUILink>
+            {(() => {
+              let path = "/practice/";
+              const crumbs = breadcrumbs.split("-");
+              return crumbs.length == 0 ||
+                (crumbs.length == 1 && crumbs[0] === "")
+                ? null
+                : crumbs.map((crumb, idx) => {
+                    let crumbHint = crumb.replace('_', ' ');
+                    crumbHint = crumbHint[0].toUpperCase() + crumbHint.slice(1);
+                    path += (idx !== 0 ? "-" : "") + crumb;
+                    if (idx < crumbs.length - 1) {
+                      return (
+                        <MUILink
+                          key={`crumb-${crumb}-${idx}`}
+                          underline='hover'
+                          color='inherit'
+                          component={RouterLink}
+                          to={`${path}`}>
+                          {crumbHint}
+                        </MUILink>
+                      );
+                    } else {
+                      return <Typography key={`last-crumb`}color='text.primary'>{crumbHint}</Typography>;
+                    }
+                  });
+            })()}
+          </Breadcrumbs>
+          <Outlet context={[setBreadcrumbs, setSections]} />
+        </Box>
       </Box>
     </>
   );
 }
+
+export { default as ExercisePage } from "./exercise";
+export { default as CategoryPage } from "./category";

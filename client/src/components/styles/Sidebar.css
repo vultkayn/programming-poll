@@ -5,3 +5,14 @@
 .SidebarListing-item {
     font-size: 1.8rem;
 }
+
+
+
+.scrolling-area.scroll-right {
+    overflow: scroll;
+    direction: rtl;
+  }
+
+.scrolling-area.scroll-right * {
+    direction: ltr;
+}

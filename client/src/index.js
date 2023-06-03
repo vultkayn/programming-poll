@@ -10,9 +10,7 @@ import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { createApiClient } from "./bridge/bridge";
 import useAuth, { AuthProvider } from "./bridge/AuthProvider";
-import CategoriesListingPage from "./routes/practice";
-import CategoryPage from "./components/CategoryPage";
-import ExercisePage from "./components/ExercisePage";
+import CategoriesListingPage, {CategoryPage, ExercisePage} from "./routes/practice";
 import ChatRoomPage from "./routes/chat";
 
 const apiClient = createApiClient();
@@ -60,7 +58,13 @@ const router = (authContext) =>
             {
               path: "practice/",
               element: <CategoriesListingPage />,
+              errorElement: <ErrorPage />,
               children: [
+                {
+                  index: true,
+                  element:<CategoryPage />
+                },
+
                 {
                   path: ":uri",
                   children: [
