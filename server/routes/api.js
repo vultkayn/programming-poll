@@ -8,7 +8,7 @@ router.get('/', function(req, res, next) {
 
 router.use('/users', require('./users'));
 router.use('/auth', require('./auth'));
-router.use('/exercises', require('./exercises'));
+router.use('/practice', require('./practice'));
 
 router.use('/admin', require('./admin'))
 
