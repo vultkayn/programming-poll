@@ -1,58 +1,59 @@
 client:
-  - breacrumbs:
-      - Add breadcrumbs to practice/. Update it from subcategories.
-        -- Clicking on any part of the breadcrumbs should navigate to matching history
-
   - Category should become a parent of exercice
-  - Only root (practice/) should produce the sidebar and FUTURE
-    breadcrumbs.
-  - Only categories should update root/ data about current path
-  - Add inner sidebar to exercises, lighter, to navigate
-    among the questions
   - Add progress bar at the very bottom (fixed pos) when solving
     exercise
-  - Add Check|Cross-Circle to SUBMITTED questions depending on
-    their status
+
   - A category content should display a dense list of its
     exercises, and their status (date, solved, progress)
 server:
-  - GET /practice/categories: list all categories
-  - GET /practice/category/:path:
-      - returns a list [subcategories, exercises] of the given category
-  - GET /practice/exercise/:path:
-      - returns a name, title, subject, list of questions of the given exercise
-  - POST /practice/exercise/:path/:exID/:qID:
-      - submit answers for the given question.
-  - POST /practice/exercises/:
+  # - GET /practice/categories: list all categories
+  # - GET /practice/category/:path:
+  #     - returns a list [subcategories, exercises] of the given category
+  - POST /practice/category:
+      - create a category
+      - subcategories
+      - exercises
+      - needs being logged in
+  - POST /practice/category/:path/ex/:
+      - needs being logged in
       - create new exercise
-      - path
+      - category path
       - name
-      - questions
-  - DELETE /practice/exercises/:path/:id: delete the given exercise (by putting dummy exercise data in its place)
-database:
-  - Category:
-      - unique path
-      - ref[]: to exercises
-      - progress: nb of solved exercises
-      - name
-  - Exercice:
-      - unique path
-      - name
-      - ref[]: to questions
-  - Question:
-      - id: unique within an exercise
-      - title
-      - subject
-      - language: optional
-      - languageContent: optional
-      - (type, arr(name, label)[]) choices: array of choices
-      - explanation: explanation in case of failure
-      - (value)[] answers: array of expected 'any' value, one per choice.
-  - User:
-      - ref[]: to attempts
-  - Attempt:
-      - ref: to exercice
-      - progress: nb of solved questions
-      - submissionDate
-      - (questionRef, (value)[])[]: map of questionRef to the submitted answer. 
-      - virtual solved: progress == questions.length
+      - create questions
+  - GET /practice/category/:path/ex/:name:
+      - returns a name, title, subject, list of questions of the given exercise
+  - PUT /practice/category/:path/ex/:name:
+      - Update an exercise
+  - POST /practice/category/:path/ex/:name:
+      - submit an exercise
+  - POST /practice/category/:path/ex/:name/:qID:
+      - needs being logged in
+      - submit answers for the given question.
+  - DELETE /practice/category/:path/ex/:name: delete the given exercise (by putting dummy exercise data in its place)
+# database:
+# - Category:
+#     - unique path
+#     - ref[]: to exercises
+#     - progress: nb of solved exercises
+#     - name
+# - Exercice:
+#     - unique path
+#     - name
+#     - ref[]: to questions
+# - Question:
+#     - id: unique within an exercise
+#     - title
+#     - statement
+#     - language: optional
+#     - languageContent: optional
+#     - (type, arr(name, label)[]) choices: array of choices
+#     - explanation: explanation in case of failure
+#     - (value)[] answers: array of expected 'any' value, one per choice.
+# - User:
+#     - ref[]: to attempts
+# - Attempt:
+#     - ref: to exercice
+#     - progress: nb of solved questions
+#     - submissionDate
+#     - (questionRef, (value)[])[]: map of questionRef to the submitted answer.
+#     - virtual solved: progress == questions.length
