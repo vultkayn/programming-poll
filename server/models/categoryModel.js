@@ -27,31 +27,77 @@ const CategorySchema = new Schema(
         },
         message: "Invalid format of the name",
       },
+      required: [true, "Category name required"],
+    },
+    uriName: {
+      type: String,
+      validate: {
+        validator: (v) => {
+          return pathRegex.test(v);
+        },
+        message: "Invalid format of the uri name",
+      },
     },
     description: String,
-    sections: {
-      subcategories: [
-        {
-          type: Schema.Types.ObjectId,
-          ref: "Category",
-        },
-      ],
-      exercises: [
-        {
-          type: Schema.Types.ObjectId,
-          ref: "Exercise",
-        },
-      ],
-    },
   },
   {
     toJSON: { virtuals: true },
   }
 );
 
+/**
+ *
+ * @param {String} uriPath The full path as given in the request uri.
+ * @param {String} sep Separator used to distinguished the path and the name.
+ * @returns The extracted relPath part of the uriPath, identical to the unique Schema identifier.
+ */
+function getRelPathOfURIPath(uriPath, sep = "-") {
+  if (!uriPath) return uriPath;
+  const lastSepPos = uriPath.lastIndexOf(sep);
+  if (lastSepPos === -1) return uriPath;
+  return uriPath.slice(0, lastSepPos);
+}
+
+/**
+ *
+ * @param {String} uriPath The full path as given in the request uri.
+ * @param {String} sep Separator used to distinguished the path and the name.
+ * @returns {relPath, uriName} The relative path as the unique identifier in the Schema, and the name part of the uri.
+ */
+function splitURIPath(uriPath, sep = "-") {
+  const relPath = getRelPathOfURIPath(uriPath);
+  const uriName =
+    relPath.length === uriPath.length
+      ? uriPath
+      : uriPath.replace(relPath + sep, "");
+  return { relPath: relPath, uriName: uriName };
+}
+
 CategorySchema.virtual("kind").get(() => 0);
 CategorySchema.virtual("solved").get(() => true);
-CategorySchema.virtual("path").get(function () {
+CategorySchema.virtual("uriPath")
+  .get(function () {
+    return this.relPath + "-" + this.uriName;
+  })
+  .set(function (uriPath) {
+    const { relPath, uriName } = splitURIPath(uriPath, "-");
+    this.relPath = relPath;
+    this.uriName = uriName;
+  });
+
+CategorySchema.virtual("progress").get(function () {
+  // check exercises 'solved'
+  return [0, 50];
+});
+
+CategorySchema.index({ relPath: 1, uriName: 1 });
+
+exports.Category = mongoose.model("Category", CategorySchema);
+exports.nameRegex = nameRegex;
+exports.pathRegex = pathRegex;
+exports.splitURIPath = splitURIPath;
+
+/*
   const formatNameURI = (filteredName) => {
     return filteredName
       .replaceAll(/[^a-zA-Z0-9-+_ ]/g, "")
@@ -59,14 +105,4 @@ CategorySchema.virtual("path").get(function () {
       .replaceAll(" ", "_");
   };
   const pureNameURI = formatNameURI(this.name);
-  return this.relPath + "-" + pureNameURI;
-});
-
-CategorySchema.virtual("progress").get(function () {
-  // check exercises 'solved'
-  return [0, 50];
-});
-
-exports.Category = mongoose.model("Category", CategorySchema);
-exports.nameRegex = nameRegex;
-exports.pathRegex = pathRegex;
+  */
