@@ -11,7 +11,7 @@ router.delete("/:name", exerciseCtrl.delete);
 router.put("/:name", exerciseCtrl.update);
 
 // questions
-router.post("/:name/:qid", exerciseCtrl.submitQuest);
-router.put("/:name/:qid", exerciseCtrl.updateQuest);
+router.post("/:name/q", exerciseCtrl.addQuest);
+router.delete("/:name/q/:qid", exerciseCtrl.dropQuest);
 
 module.exports = router;

@@ -1,4 +1,4 @@
-const { Attempt } = require("../models/attemptModel");
+const { Attempt, titleRegex } = require("../models/attemptModel");
 const {
   pathRegex,
   Category,
@@ -11,7 +11,12 @@ const { checkAuth } = require("../passport/authenticate");
 const { validateSanitization } = require("../sanitizers");
 const { body } = require("express-validator");
 
-const { uiName2uriName } = require("./validators").practice;
+const {
+  uiName2uriName,
+  questionAnswersCustomValidator,
+  questionChoicesCustomValidator,
+} = require("./validators").practice;
+
 const nameMatchesURI = (uiname, { req }) => {
   const uriName = req.params.name;
   if (uriName !== uiName2uriName(uiname))
@@ -19,51 +24,49 @@ const nameMatchesURI = (uiname, { req }) => {
   return true;
 };
 
+async function getExoDoc(req) {
+  const { relPath, uriName } = splitURIPath(req.params.path);
+  const category = await Category.findOne({
+    relPath: relPath,
+    uriName: uriName,
+  }).exec();
+
+  const exo = await Exercise.findOne({
+    category: category._id,
+    uriName: req.params.name,
+  }).exec();
+  return exo;
+}
+
 exports.questions = [
   validateSanitization,
   async (req, res) => {
-    const { relPath, uriName } = splitURIPath(req.params.path);
-    const category = await Category.findOne({
-      relPath: relPath,
-      uriName: uriName,
-    }).exec();
-
-    const exo = await Exercise.findOne({
-      category: category._id,
-      uriName: req.params.name,
-    }).exec();
-
+    const exo = await getExoDoc(req);
     exo.populate("questions");
     return res.json(exo.questions);
-  }];
+  },
+];
 
 // light version (questions are not populated)
 exports.request = [
   validateSanitization,
   async (req, res) => {
-    const { relPath, uriName } = splitURIPath(req.params.path);
-    const category = await Category.findOne({
-      relPath: relPath,
-      uriName: uriName,
-    }).exec();
-
-    const exo = await Exercise.findOne({
-      category: category._id,
-      uriName: req.params.name,
-    }).exec();
-
+    const exo = await getExoDoc(req);
     await exo.populate("category");
 
-    const user = (req.user) ? await userModel.findById(req.user.id).exec() : null;
+    const user = req.user ? await userModel.findById(req.user.id).exec() : null;
     let attempt = null;
     if (user._id)
-      attempt = await Attempt.findOne({exercise: exo._id, by: user._id}).exec();
+      attempt = await Attempt.findOne({
+        exercise: exo._id,
+        by: user._id,
+      }).exec();
 
     let result = exo.toObject();
     result.solved = attempt?.solved ?? false;
     if (attempt) {
       result.answers = attempt.answers;
-      result.submissionDate = attempt.submissionDate; 
+      result.submissionDate = attempt.submissionDate;
     }
     return res.json(result);
   },
@@ -138,16 +141,7 @@ exports.delete = [
 
   async (req, res) => {
     // TODO should delete all attempts made by user of this exercise
-    const { relPath, uriName } = splitURIPath(req.params.path);
-    const category = await Category.findOne({
-      relPath: relPath,
-      uriName: uriName,
-    }).exec();
-
-    const exo = await Exercise.findOne({
-      category: category._id,
-      uriName: req.params.name,
-    }).exec();
+    const exo = await getExoDoc(req);
     const qIDS = exo.questions;
     await Promise.all(
       qIDS.forEach(async (qid) => {
@@ -209,10 +203,60 @@ exports.update = [
   },
 ];
 
-exports.submitQuest = (req, res) => {
-  res.send("NOT IMPLEMENTED: exercise update GET");
-};
+exports.addQuest = [
+  checkAuth(),
+  body("title")
+    .escape()
+    .custom((v) => titleRegex.test(v)),
+  body("statement").escape().notEmpty(),
+  body("language").optional().escape().isLength({ max: 15 }),
+  body("languageContent").optional().escape(),
+  body("explanation").optional().escape(),
+  body("choices").isObject().escape().custom(questionChoicesCustomValidator),
+  body("expectedAnswers")
+    .isArray()
+    .escape()
+    .custom(questionAnswersCustomValidator),
+  validateSanitization,
 
-exports.updateQuest = (req, res) => {
-  res.send("NOT IMPLEMENTED: exercise update GET");
-};
+  async (req, res, next) => {
+    if (req.body.expectedAnswers.length !== req.body.choices.arr.length)
+      return next({
+        error: { choices: "not the same number of answers than choices" },
+      });
+
+    const exo = await getExoDoc(req);
+
+    const q = new Question({
+      title: req.body.title,
+      statement: req.body.statement,
+      language: req.body.language ?? "",
+      languageContent: req.body.languageContent ?? "",
+      explanation: req.body.explanation ?? "",
+      choices: req.body.choices,
+      expectedAnswers: req.body.expectedAnswers,
+    });
+    const qdoc = await q.save();
+
+    let updatedQ = exo.questions;
+    updatedQ.push(qdoc._id);
+    await exo.updateOne({ questions: updatedQ }).exec();
+    return res.sendStatus(200);
+  },
+];
+
+exports.dropQuest = [
+  checkAuth(),
+  validateSanitization,
+  async (req, res) => {
+    // FIXME Should update all Attempts made on this exercise
+    const exo = await getExoDoc(req);
+    if (exo.questions.includes(req.params.qid)) {
+      const newQ = exo.questions.filter((qid) => qid !== req.params.qid);
+      await exo.updateOne({questions: newQ});
+      await Question.findByIdAndDelete(req.params.qid);
+      return res.sendStatus(200);
+    }
+    return res.sendStatus(400);
+  },
+];
