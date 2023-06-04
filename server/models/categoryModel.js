@@ -92,17 +92,14 @@ CategorySchema.virtual("progress").get(function () {
 
 CategorySchema.index({ relPath: 1, uriName: 1 });
 
+
+const {Exercise} = require("./exerciseModel");
+CategorySchema.pre('deleteOne', {document: true, query: false}, async function () {
+  return await Exercise.deleteMany({category: this._id});
+});
+
+
 exports.Category = mongoose.model("Category", CategorySchema);
 exports.nameRegex = nameRegex;
 exports.pathRegex = pathRegex;
 exports.splitURIPath = splitURIPath;
-
-/*
-  const formatNameURI = (filteredName) => {
-    return filteredName
-      .replaceAll(/[^a-zA-Z0-9-+_ ]/g, "")
-      .replaceAll("-", "_")
-      .replaceAll(" ", "_");
-  };
-  const pureNameURI = formatNameURI(this.name);
-  */

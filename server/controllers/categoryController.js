@@ -45,14 +45,18 @@ function uiName2uriName(uiName) {
   return formatNameURI(pureName);
 }
 
-async function findSection(category, sectionName) {
-  const subRelPath = category.path;
+async function findSectionDocs({ category, parentPath, sectionName }) {
+  const subRelPath = category?.path ?? parentPath;
   let section = [];
   switch (sectionName) {
     case "subcategories":
       section = await Category.find({ relPath: subRelPath }).exec();
       break;
     case "exercises":
+      if (category === undefined || category === null)
+        throw new Error(
+          "'exercises' can only be found with a defined category"
+        );
       section = await Exercise.find({ category: category._id }).exec();
       break;
     default:
@@ -60,8 +64,17 @@ async function findSection(category, sectionName) {
         `such sectionName ${sectionName} has not been implemented yet`
       );
   }
-  return section
-    ? section.map((sub) => {
+  return section;
+}
+async function buildSection({ title, parentPath, name, category }) {
+  const sectionDocuments = await findSectionDocs({
+    category,
+    parentPath,
+    sectionName: name,
+    name,
+  });
+  const listing = sectionDocuments
+    ? sectionDocuments.map((sub) => {
         return {
           path: sub.path,
           name: sub.name,
@@ -70,10 +83,47 @@ async function findSection(category, sectionName) {
         };
       })
     : [];
+
+  return { title, listing };
 }
 
-exports.list = async (req, res) => {
-  const indexCategories = await Category.find({ relPath: "" }).exec();
+exports.subcategories = [
+  pathParamValidator,
+  validateSanitization,
+  async (req, res) => {
+    const { relPath, uriName } = splitURIPath(req.params.path, "-");
+    const category = await Category.findOne({
+      relPath: relPath,
+      uriName: uriName,
+    }).exec();
+    // BUG deal with error if not found.
+    const subCats = await findSectionDocs({
+      category,
+      sectionName: "subcategories",
+    }).exec();
+    return res.json(subCats);
+  },
+];
+
+exports.exercises = [
+  pathParamValidator,
+  validateSanitization,
+  async (req, res) => {
+    const { relPath, uriName } = splitURIPath(req.params.path, "-");
+    const category = await Category.findOne({
+      relPath: relPath,
+      uriName: uriName,
+    }).exec();
+    // BUG deal with error if not found.
+    const exos = await findSectionDocs({
+      category,
+      sectionName: "exercises",
+    }).exec();
+    return res.json(exos);
+  },
+];
+
+exports.index = async (req, res) => {
   return Promise.all(
     indexCategories.map(async (cat) => {
       return {
@@ -82,19 +132,20 @@ exports.list = async (req, res) => {
         solved: cat.solved,
         description: cat.description,
         sections: [
-          {
+          await buildSection({
             title: "Subcategories",
-            listing: await findSection(cat, "subcategories"),
-          },
+            name: "subcategories",
+            parentPath: "",
+          }),
         ],
       };
     })
   ).then((result) => res.json(result));
 };
 
-exports.detail = [
+exports.request = [
   pathParamValidator,
-
+  validateSanitization,
   async (req, res) => {
     const uriPath = req.params.path;
     const { relPath, uriName } = splitURIPath(uriPath, "-");
@@ -105,19 +156,19 @@ exports.detail = [
     // BUG deal with error if not found.
 
     let sections = [];
-    const subs = await findSection(category, "subcategories");
-    if (subs.length)
-      sections.push({
-        title: "Subcategories",
-        listing: subs,
-      });
+    const subs = await buildSection({
+      title: "Subcategories",
+      parentPath: category.path,
+      name: "subcategories",
+    });
+    if (subs.listing.length) sections.push(subs);
 
-    const exos = await findSection(category, "exercises");
-    if (exos.length)
-      sections.push({
-        title: "Exercises",
-        listing: exos,
-      });
+    const exos = await buildSection({
+      title: "Exercises",
+      parentPath: category.path,
+      name: "exercises",
+    });
+    if (exos.listing.length) sections.push(exos);
 
     return res.json({
       name: category.name,
@@ -133,6 +184,7 @@ exports.create = [
   // hasAccessRights(ACCESS.W + ),
   checkAuth(),
   body("name").escape().notEmpty().custom(customNameMatchesURIValidator("-")),
+  validateSanitization,
   async (req, res) => {
     const { name, description, path } = req.body;
     let category = new Category({
@@ -152,13 +204,33 @@ exports.create = [
 exports.delete = [
   checkAuth(),
   pathParamValidator,
+  validateSanitization,
   async (req, res) => {
     const { relPath, uriName } = splitURIPath(req.params.path);
-    await Category.findOneAndDelete({
+    const cat = await Category.findOne({
       relPath: relPath,
       uriName: uriName,
     });
 
+    async function subDocsTreeDeletion(category) {
+      // delete all subcategories if the path change.
+      const subDocs = await findSectionDocs({
+        category: cat,
+        sectionName: "subcategories",
+      });
+      if (subDocs.length === 0) return;
+      await Promise.all(
+        subDocs.forEach(async (sub) => {
+          await subDocsTreeDeletion(sub); // to trigger pre('deleteOne') hook
+          return await sub.deleteOne();
+        })
+      );
+    }
+
+    let delSubCats = true; // TODO change that for optional deletion functionality
+    delSubCats ? await subDocsTreeDeletion(cat) : await cat.deleteOne();
+    // FIXME for optional functionality, the subcategories should be moved one level up
+    
     return res.sendStatus(200);
   },
 ];
@@ -168,7 +240,8 @@ exports.update = [
   pathParamValidator,
   body("name").optional().escape().custom(customNameMatchesURIValidator("-")),
   body("description").optional().escape(),
-
+  validateSanitization,
+  
   async (req, res) => {
     const { relPath, uriName } = splitURIPath(req.params.path);
     let updates = {};
@@ -180,9 +253,8 @@ exports.update = [
       { relPath: relPath, uriName: uriName },
       { ...updates }
     );
-
-    // FIXME update all exercises and subcategories if the path change.
-
+    // FIXME for optional functionality, the subcategories should be renamed if this one is renamed
+    
     return res.sendStatus(200);
   },
 ];
