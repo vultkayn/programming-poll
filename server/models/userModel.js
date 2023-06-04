@@ -54,12 +54,6 @@ const UserSchema = new Schema({
     type: IdentitySchema,
     default: {},
   },
-  attempts: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Attempt",
-    },
-  ],
 });
 
 UserSchema.virtual("fullname").get(function () {

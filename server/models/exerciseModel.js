@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const nameRegex = /[\w ._,+-]+/;
+const nameRegex = /[\w ._,+-]{1,30}/;
 
 const ExerciseSchema = new Schema(
   {
@@ -17,12 +17,21 @@ const ExerciseSchema = new Schema(
         message: "Invalid format of the name",
       },
     },
+    uriName: {
+      type: String,
+      required: true,
+      validate: {
+        validator: (v) => {
+          return pathRegex.test(v);
+        },
+        message: "Invalid format of the uri name",
+      },
+    },
     statement: { type: String, required: true },
-    createdAt: { type: Date, default: Date.now },
     lastModified: { type: Date, default: Date.now, required: true },
     lastModifiedBy: {
       type: Schema.Types.ObjectId,
-      ref: "Editor",
+      ref: "User",
       required: true,
     },
     questions: [
@@ -40,6 +49,7 @@ const ExerciseSchema = new Schema(
   },
   {
     toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
@@ -56,5 +66,5 @@ ExerciseSchema.virtual("path").get(function () {
   return this.category.path + "/" + pureNameURI;
 });
 
-exports.model = mongoose.model("Exercise", ExerciseSchema);
+exports.Exercise = mongoose.model("Exercise", ExerciseSchema);
 exports.nameRegex = nameRegex;

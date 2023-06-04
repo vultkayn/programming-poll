@@ -47,5 +47,5 @@ const QuestionSchema = new Schema(
 );
 
 
-exports.model = mongoose.model("Question", QuestionSchema);
+exports.Question = mongoose.model("Question", QuestionSchema);
 exports.titleRegex = mongoose.model("Question", QuestionSchema);

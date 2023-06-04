@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const {Exercise, nameRegex} = require("./exerciseModel");
 
 const pathRegex = /[a-zA-Z0-9-_+]*/;
-const nameRegex = /[\w ._,+-]+/;
 
 const CategorySchema = new Schema(
   {
@@ -31,6 +31,7 @@ const CategorySchema = new Schema(
     },
     uriName: {
       type: String,
+      required: true,
       validate: {
         validator: (v) => {
           return pathRegex.test(v);
@@ -93,7 +94,6 @@ CategorySchema.virtual("progress").get(function () {
 CategorySchema.index({ relPath: 1, uriName: 1 });
 
 
-const {Exercise} = require("./exerciseModel");
 CategorySchema.pre('deleteOne', {document: true, query: false}, async function () {
   return await Exercise.deleteMany({category: this._id});
 });

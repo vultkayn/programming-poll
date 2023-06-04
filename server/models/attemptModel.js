@@ -19,13 +19,17 @@ const AttemptSchema = new Schema(
         ],
       },
     ],
-    exercise: [
-      {
-        type: Schema.Types.ObjectId,
-        required: true,
-        ref: "Exercise",
-      },
-    ],
+    exercise: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "Exercise",
+    },
+
+    by: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
   },
   { toJSON: { virtuals: true } }
 );
@@ -34,5 +38,5 @@ AttemptSchema.virtual("solved").get(function () {
   return false; // FIXME virtual solved for attempts ?
 });
 
-exports.model = mongoose.model("Attempt", AttemptSchema);
+exports.Attempt = mongoose.model("Attempt", AttemptSchema);
 exports.titleRegex = mongoose.model("Attempt", AttemptSchema);

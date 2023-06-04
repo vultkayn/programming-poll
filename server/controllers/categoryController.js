@@ -1,49 +1,28 @@
 const {
   Category,
   splitURIPath,
-  pathRegex,
+  nameRegex,
 } = require("../models/categoryModel");
 const { Exercise } = require("../models/exerciseModel");
 const { checkAuth } = require("../passport/authenticate");
 const { validateSanitization } = require("../sanitizers");
+const { body } = require("express-validator");
 
-const { param, body } = require("express-validator");
-
-const pathParamValidator = param("path")
-  .escape()
-  .notEmpty()
-  .custom((value) => pathRegex.test(value));
+const { uiName2uriName } = require("./validators").practice;
 
 /**
  * Middleware to validate that the given User Interface name, once formatted, matches the "name" component of the uriPath.
  * @param {String} sep Separator used to distinguished the path and the name.
  * @returns Nothing
  */
-const customNameMatchesURIValidator =
-  (sep = "-") =>
+const nameMatchesURI = (sep = "-") => {
   (uiname, { req }) => {
     const { uriName } = splitURIPath(req.params.path, sep);
     if (uriName !== uiName2uriName(uiname))
       throw new Error("ill-formed name does not match category path");
     return true;
   };
-
-/**
- *
- * @param {String} uiName The name as given in the User Interface, i.e. without much validation and processing
- * @returns uriName = String: A uri friendly formatted name, as could appear suffixed to relPath in a uri
- */
-function uiName2uriName(uiName) {
-  const formatNameURI = (filteredName) => {
-    return filteredName
-      .replaceAll(/[^a-zA-Z0-9-+_ ]/g, "")
-      .replaceAll("-", "_")
-      .replaceAll(" ", "_");
-  };
-
-  const pureName = uiName.replaceAll(/[^\w ._,+-]/g, "");
-  return formatNameURI(pureName);
-}
+};
 
 async function findSectionDocs({ category, parentPath, sectionName }) {
   const subRelPath = category?.path ?? parentPath;
@@ -88,7 +67,6 @@ async function buildSection({ title, parentPath, name, category }) {
 }
 
 exports.subcategories = [
-  pathParamValidator,
   validateSanitization,
   async (req, res) => {
     const { relPath, uriName } = splitURIPath(req.params.path, "-");
@@ -106,7 +84,6 @@ exports.subcategories = [
 ];
 
 exports.exercises = [
-  pathParamValidator,
   validateSanitization,
   async (req, res) => {
     const { relPath, uriName } = splitURIPath(req.params.path, "-");
@@ -144,7 +121,6 @@ exports.index = async (req, res) => {
 };
 
 exports.request = [
-  pathParamValidator,
   validateSanitization,
   async (req, res) => {
     const uriPath = req.params.path;
@@ -183,7 +159,11 @@ exports.request = [
 exports.create = [
   // hasAccessRights(ACCESS.W + ),
   checkAuth(),
-  body("name").escape().notEmpty().custom(customNameMatchesURIValidator("-")),
+  body("name")
+    .escape()
+    .notEmpty()
+    .custom((v) => nameRegex.test(v)),
+  body("description").optional().escape(),
   validateSanitization,
   async (req, res) => {
     const { name, description, path } = req.body;
@@ -203,7 +183,7 @@ exports.create = [
 
 exports.delete = [
   checkAuth(),
-  pathParamValidator,
+
   validateSanitization,
   async (req, res) => {
     const { relPath, uriName } = splitURIPath(req.params.path);
@@ -230,31 +210,31 @@ exports.delete = [
     let delSubCats = true; // TODO change that for optional deletion functionality
     delSubCats ? await subDocsTreeDeletion(cat) : await cat.deleteOne();
     // FIXME for optional functionality, the subcategories should be moved one level up
-    
+
     return res.sendStatus(200);
   },
 ];
 
 exports.update = [
   checkAuth(),
-  pathParamValidator,
-  body("name").optional().escape().custom(customNameMatchesURIValidator("-")),
+
+  body("name").optional().escape().notEmpty().custom(nameMatchesURI("-")),
   body("description").optional().escape(),
   validateSanitization,
-  
+
   async (req, res) => {
     const { relPath, uriName } = splitURIPath(req.params.path);
     let updates = {};
     if (req.body.description) updates.description = req.body.description;
     if (req.body.name) {
+      updates.name = req.body.name;
+      updates.uriName = uiName2uriName(updates.name);
+      // FIXME update all current recursive subcategories path
+      // use findAndUpdate to update all whose relPath prefix matched this one previous full path.
     }
 
-    await Category.updateOne(
-      { relPath: relPath, uriName: uriName },
-      { ...updates }
-    );
-    // FIXME for optional functionality, the subcategories should be renamed if this one is renamed
-    
+    await Category.updateOne({ relPath: relPath, uriName: uriName }, updates);
+
     return res.sendStatus(200);
   },
 ];
