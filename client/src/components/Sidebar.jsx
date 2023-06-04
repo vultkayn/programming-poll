@@ -3,6 +3,7 @@ import "./styles/Sidebar.css";
 
 import { Link } from "react-router-dom";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import AddIcon from "@mui/icons-material/Add";
 
 import {
   Box,
@@ -63,6 +64,8 @@ export default function Sidebar({
 export function SidebarListing({
   title = "",
   divide = true,
+  canAdd = true,
+  addTarget = "",
   content = [],
   onClick = (e, idx) => {},
   makeTarget = (v, idx) => v.name,
@@ -123,6 +126,18 @@ export function SidebarListing({
             </ListItemButton>
           );
         })}
+        {canAdd ? (
+          <ListItemButton
+            component={Link}
+            sx={{ justifyContent: "center" }}
+            to={addTarget}
+            reloadDocument={disableRouting}>
+            <ListItemIcon sx={{ minWidth: "min-content" }}>
+              {" "}
+              <AddIcon htmlColor='blue' />
+            </ListItemIcon>
+          </ListItemButton>
+        ) : null}
       </Collapse>
     </List>
   );

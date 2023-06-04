@@ -2,25 +2,59 @@ import React from "react";
 import { isRouteErrorResponse, useRouteError } from "react-router-dom";
 import "./styles/error.css";
 
-import { Typography } from "@mui/material";
+import { Typography, Box } from "@mui/material";
 
 export default function ErrorPage() {
   const error = useRouteError();
-  console.error(error);
+  // console.error("error is", error);
+  console.log("tried render error page");
 
   if (isRouteErrorResponse(error)) {
     return (
-      <div id='error-page'>
-        <Typography variant='h2' fontFamily="Monospace">Oops! Error {error.status}</Typography>
-        <p>
-          <Typography variant="body1">Sorry, an unexpected error has occurred.</Typography>
-        </p>
-        <p>
-          <Typography color="#444" fontWeight="200" fontStyle="oblique">
-            {error.statusText || error.message}
+      <Box id='error-page'>
+        <Typography
+          variant='h2'
+          gutterBottom
+          marginBottom='10vh'
+          fontFamily='Monospace'>
+          Oops! Error {error?.status ?? "'Unknown Status'"}
+        </Typography>
+        <div>
+          <Typography variant='body1'>
+            Sorry, an unexpected error has occurred.
           </Typography>
-        </p>
-      </div>
+          <Typography
+            color='#444'
+            fontWeight='200'
+            fontStyle='oblique'>
+            {(error.statusText || error.message) ??
+              "An internal error has occurred."}
+          </Typography>
+        </div>
+      </Box>
     );
   }
+  return (
+    <Box id='error-page'>
+      <Typography
+        variant='h2'
+        gutterBottom
+        marginBottom='10vh'
+        fontFamily='Monospace'>
+        Oops! Error {error?.status ?? "'Unknown Status'"}
+      </Typography>
+      <div>
+        <Typography variant='body1'>
+          Sorry, an unexpected error has occurred.
+        </Typography>
+        <Typography
+          color='#444'
+          fontWeight='200'
+          fontStyle='oblique'>
+          {(error.statusText || error.message) ??
+            "An internal error has occurred."}
+        </Typography>
+      </div>
+    </Box>
+  );
 }

@@ -27,7 +27,7 @@ const ExerciseSchema = new Schema(
         message: "Invalid format of the uri name",
       },
     },
-    statement: { type: String, required: true },
+    description: { type: String, required: true },
     lastModified: { type: Date, default: Date.now, required: true },
     lastModifiedBy: {
       type: Schema.Types.ObjectId,

@@ -12,6 +12,9 @@ import { createApiClient } from "./bridge/bridge";
 import useAuth, { AuthProvider } from "./bridge/AuthProvider";
 import CategoriesListingPage, {CategoryPage, ExercisePage} from "./routes/practice";
 import ChatRoomPage from "./routes/chat";
+import { CategoryIndexLoader, CategoryLoader } from "./routes/category";
+import CategoryCreationForm, {action as CategoryCreationAction} from "./routes/categoryCreation";
+import ExerciseCreationForm, {action as ExerciseCreationAction} from "./routes/exerciseCreation";
 
 const apiClient = createApiClient();
 
@@ -62,7 +65,14 @@ const router = (authContext) =>
               children: [
                 {
                   index: true,
+                  id: 'categoryIndex',
+                  loader: CategoryIndexLoader(authContext),
                   element:<CategoryPage />
+                },
+                {
+                  path: "@new",
+                  action: CategoryCreationAction(authContext),
+                  element: <CategoryCreationForm />
                 },
 
                 {
@@ -70,10 +80,18 @@ const router = (authContext) =>
                   children: [
                     {
                       index: true,
+                      id: 'category',
+                      loader: CategoryLoader(authContext),
                       element: <CategoryPage />,
                     },
                     {
+                      path: "@new",
+                      action: ExerciseCreationAction(authContext),
+                      element: <ExerciseCreationForm />
+                    },
+                    {
                       path: ":id",
+                      id: "exercise",
                       element: <ExercisePage />,
                     }
                   ],

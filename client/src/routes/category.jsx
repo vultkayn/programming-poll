@@ -1,27 +1,48 @@
+import { Typography, Box, Button } from "@mui/material";
 import React, { useEffect } from "react";
-import { useOutletContext, useLocation } from "react-router-dom";
+import { useOutletContext, useLoaderData, Link } from "react-router-dom";
 
-export function CategoryLoader (auth) {
-  return ({ params }) => {
-    const uri = params.uri;
-    console.log(uri);
-    if (!uri || uri.length == 0)
-      return auth.send({
-        method: 'get',
-        url: `/api/practice/category/${uri}`
-      });
-    return auth.send({
-      method: 'get',
-      url: `/api/practice/category/${uri}`
+export function CategoryIndexLoader(auth) {
+  return async () => {
+    const res = await auth.send({
+      method: "get",
+      url: `/api/practice/categories`,
     });
+    console.log("res:", res);
+    return res?.data ?? null;
+  };
+}
+
+export function CategoryLoader(auth) {
+  return async ({ params }) => {
+    const uri = params.uri;
+    console.log("uri is", uri);
+    if (!uri || uri.length == 0) {
+      // FIXME might drop that, should work both case
+      const res = await auth.send({
+        method: "get",
+        url: `/api/practice/categories`,
+      }).data;
+      return res;
+    }
+    const res = await auth.send({
+      method: "get",
+      url: `/api/practice/category/${uri}`,
+    });
+    return res?.data ?? null;
   };
 }
 
 export default function CategoryPage() {
-  const [setBreadcrumbs, setSections] = useOutletContext();
-  const path = useLocation().pathname.replace("/practice/", "");
+  const [setBreadcrumbs, setSections, setCurrent] = useOutletContext();
+  // const uiPath = useLocation().pathname.replace("/practice/", "");
 
-  const sections = [
+  const details = useLoaderData();
+  const path = details?.path ?? "";
+
+  console.log("details are", details);
+
+  /*   const sectionsDummy = [
     {
       title: "Exercises",
       listing: [
@@ -80,12 +101,55 @@ export default function CategoryPage() {
         { path: "types2", name: "types", solved: false, kind: 0 },
       ],
     },
-  ];
+  ]; */
 
   useEffect(() => {
-    setSections(sections);
+    setSections(details?.sections ?? []);
     setBreadcrumbs(path.endsWith("/") ? path.slice(0, -1) : path);
-  }, [useLocation().pathname]);
+    setCurrent({
+      path: path,
+      kind: 0, // FIXME
+      name: details?.name ?? "",
+      description: details?.description ?? "",
+    });
+  }, [details]);
 
-  return <div>Category</div>;
+  if (details === null) return null;
+
+  return (
+    <Box>
+      <Box
+        flexDirection='row'
+        display='flex'
+        justifyContent='space-between'>
+        <Typography
+          gutterBottom
+          mb={10}
+          align='left'
+          variant='h3'>
+          {details.name}
+        </Typography>
+        <Button
+          component={Link}
+          to='/practice/@new'
+          sx={{
+            flexBasis: "fit-content",
+            marginRight: "5vw",
+            height: "min-content",
+          }}
+          variant='contained'>
+          <Typography variant='button'>New Category</Typography>
+        </Button>
+      </Box>
+      <Box ml={5}>
+        <Typography
+          paragraph
+          gutterBottom
+          variant='body1'
+          align='left'>
+          {details.description}
+        </Typography>
+      </Box>
+    </Box>
+  );
 }

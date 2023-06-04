@@ -177,5 +177,3 @@ export function LoginPage() {
     </Box>
   );
 }
-
-export const UserContext = React.createContext(null);

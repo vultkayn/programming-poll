@@ -125,7 +125,7 @@ exports.create = [
     let exercise = new Exercise({
       name: req.body.name,
       uriName: uiName2uriName(req.body.name),
-      statement: req.body.statement,
+      description: req.body.description,
       category: category._id,
       lastModifiedBy: authorID,
       questions: questionIDs,
@@ -179,7 +179,7 @@ exports.update = [
     }).exec();
 
     let updates = {};
-    if (req.body.statement) updates.statement = req.body.statement;
+    if (req.body.description) updates.description = req.body.description;
     if (req.body.category) {
       const newpath = splitURIPath(req.body.category);
       updates.category = await Category.findOne({

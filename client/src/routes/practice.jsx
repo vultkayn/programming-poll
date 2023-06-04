@@ -13,7 +13,7 @@ import { Box, Breadcrumbs, Typography, Link as MUILink } from "@mui/material";
  * @param {string} path path at the format cat1/cat2/.../
  * @param {int} kind 0 for a category, 1 for an exercise
  */
-function preparePathForPOST({ path, name, kind }) {
+export function preparePathForServer({ path, name, kind }) {
   const formatPath = (path) => {
     const pathBeg = path && path.length > 0 && path[0] === "/" ? 1 : 0;
     const pathEnd = // remove ending separator if any.
@@ -43,28 +43,15 @@ function preparePathForPOST({ path, name, kind }) {
   else if (kind === 1) sep = uri.length === 0 /* root? */ ? null : "/"; // no exercises allowed for root, so cannot have empty here
   if (sep === null) sep = ""; //throw new Error(""); // TODO improved the error type
 
-  return { target: uri + sep + pureNameURI, uiName: pureName };
+  return { target: uri + sep + pureNameURI, relPath: uri, uiName: pureName };
 }
 
 export default function CategoriesListingPage() {
   const [breadcrumbs, setBreadcrumbs] = React.useState("");
-  /* {     kind: 0, // 0 for catgs, 1 for exercises
-    path: "/", // object path, from root supercategory /.
-    solved: false,
-    progress: 4 
-    //kind==1 then between 0 and questionIDs.length-1
-    //kind==0 then between 0 and exercises.length -1
-    ,
-
-    // Categories specific infos:
-
-    // Exercises specific infos:
-    questionIDs: [], // used to fetch the questions
-    nbAttempts: 0,
-    lastAttemptDate: "",
-  }); */
-  const [sections, setSections] = React.useState([
-    {
+  const [sections, setSections] = React.useState([]);
+  const [current, setCurrent] = React.useState({});
+  const isIndex = breadcrumbs.length === 0;
+  /*     {
       title: "Subcategories",
       listing: [
         { path: "pointers", name: "pointers", solved: false, kind: 0 }, // FIXME path should include name too, fix above in the functions too
@@ -81,7 +68,15 @@ export default function CategoriesListingPage() {
         { path: "types", name: "types", solved: true, kind: 0 },
       ],
     },
-  ]);
+  ]); */
+
+  console.log("sections are", sections);
+  if (sections.length === 0)
+    setSections([{ title: "Subcategories", listing: [] }]);
+  if (!isIndex && sections.length === 1 && sections[0].title !== "Exercises")
+    setSections([sections[0], { title: "Exercises", listing: [] }]);
+  if (sections.length === 1 && sections[0].title !== "Subcategories")
+    setSections([sections[0], { title: "Subcategories", listing: [] }]);
 
   return (
     <>
@@ -101,8 +96,10 @@ export default function CategoriesListingPage() {
                 content={section.listing}
                 title={section.title}
                 makeIcon={makeSolvedIcon}
-                makeTarget={(v, ) => v.path}
+                makeTarget={(v) => v.path}
                 inset
+                canAdd={!isIndex}
+                addTarget={section.title === "Subcategories" ? "/practice/@new" : `/practice/${current.path}/@new`}
               />
             );
           })}
@@ -118,7 +115,9 @@ export default function CategoriesListingPage() {
               underline='hover'
               color='inherit'
               component={RouterLink}
-              onClick={(e) => {setBreadcrumbs("")}}
+              onClick={(e) => {
+                setBreadcrumbs("");
+              }}
               to='/practice'>
               Index
             </MUILink>
@@ -129,7 +128,7 @@ export default function CategoriesListingPage() {
                 (crumbs.length == 1 && crumbs[0] === "")
                 ? null
                 : crumbs.map((crumb, idx) => {
-                    let crumbHint = crumb.replace('_', ' ');
+                    let crumbHint = crumb.replace("_", " ");
                     crumbHint = crumbHint[0].toUpperCase() + crumbHint.slice(1);
                     path += (idx !== 0 ? "-" : "") + crumb;
                     if (idx < crumbs.length - 1) {
@@ -144,12 +143,18 @@ export default function CategoriesListingPage() {
                         </MUILink>
                       );
                     } else {
-                      return <Typography key={`last-crumb`}color='text.primary'>{crumbHint}</Typography>;
+                      return (
+                        <Typography
+                          key={`last-crumb`}
+                          color='text.primary'>
+                          {crumbHint}
+                        </Typography>
+                      );
                     }
                   });
             })()}
           </Breadcrumbs>
-          <Outlet context={[setBreadcrumbs, setSections]} />
+          <Outlet context={[setBreadcrumbs, setSections, setCurrent]} />
         </Box>
       </Box>
     </>

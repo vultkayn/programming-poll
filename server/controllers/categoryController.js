@@ -9,6 +9,7 @@ const { validateSanitization } = require("../sanitizers");
 const { body } = require("express-validator");
 
 const { uiName2uriName } = require("./validators").practice;
+const debug = require("debug")("practice");
 
 /**
  * Middleware to validate that the given User Interface name, once formatted, matches the "name" component of the uriPath.
@@ -25,8 +26,9 @@ const nameMatchesURI = (sep = "-") => {
 };
 
 async function findSectionDocs({ category, parentPath, sectionName }) {
-  const subRelPath = category?.path ?? parentPath;
+  const subRelPath = category?.uriPath ?? parentPath;
   let section = [];
+  debug("category is", category);
   switch (sectionName) {
     case "subcategories":
       section = await Category.find({ relPath: subRelPath }).exec();
@@ -55,7 +57,7 @@ async function buildSection({ title, parentPath, name, category }) {
   const listing = sectionDocuments
     ? sectionDocuments.map((sub) => {
         return {
-          path: sub.path,
+          path: sub.uriPath,
           name: sub.name,
           kind: sub.kind,
           solved: sub.solved,
@@ -101,23 +103,19 @@ exports.exercises = [
 ];
 
 exports.index = async (req, res) => {
-  return Promise.all(
-    indexCategories.map(async (cat) => {
-      return {
-        path: cat.path,
-        name: cat.name,
-        solved: cat.solved,
-        description: cat.description,
-        sections: [
-          await buildSection({
-            title: "Subcategories",
-            name: "subcategories",
-            parentPath: "",
-          }),
-        ],
-      };
-    })
-  ).then((result) => res.json(result));
+  // const indexCategories = await findSectionDocs({parentPath: "", sectionName: "subcategories"});
+  const subs = await buildSection({
+    title: "Subcategories",
+    name: "subcategories",
+    parentPath: "",
+  });
+  debug("subsections are", subs);
+  return res.json({
+    path: "",
+    name: "Categories Index",
+    description: "Categories Index descr",
+    sections: [subs],
+  });
 };
 
 exports.request = [
@@ -125,30 +123,37 @@ exports.request = [
   async (req, res) => {
     const uriPath = req.params.path;
     const { relPath, uriName } = splitURIPath(uriPath, "-");
+    debug("request cat", uriPath, "rel is", relPath, "uriName is", uriName);
     const category = await Category.findOne({
       relPath: relPath,
       uriName: uriName,
     }).exec();
+    
     // BUG deal with error if not found.
-
+    if (category === null)    
+      return res.status(404).json({errors: "Category not found"});
     let sections = [];
     const subs = await buildSection({
       title: "Subcategories",
-      parentPath: category.path,
+      category: category,
       name: "subcategories",
     });
     if (subs.listing.length) sections.push(subs);
 
     const exos = await buildSection({
       title: "Exercises",
-      parentPath: category.path,
       name: "exercises",
+      category: category
     });
     if (exos.listing.length) sections.push(exos);
 
+
+    debug("sending path", category.uriPath);
+
     return res.json({
       name: category.name,
-      path: category.path,
+      path: category.uriPath,
+      kind: category.kind,
       solved: category.solved,
       description: category.description,
       sections: sections,
@@ -176,7 +181,7 @@ exports.create = [
     await category.save();
     return res.json({
       name: category.name,
-      path: category.path,
+      path: category.uriPath,
     });
   },
 ];

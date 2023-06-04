@@ -8,7 +8,7 @@ const CategorySchema = new Schema(
   {
     relPath: {
       type: String,
-      required: [true, "Category unique path required"],
+      default: "",
       validate: {
         validator: function (v) {
           return pathRegex.test(v);
@@ -16,7 +16,6 @@ const CategorySchema = new Schema(
         message: "Invalid format of the category path",
       },
       trim: true,
-      unique: true,
     },
     name: {
       // name.replaceAll(/[^\w ._,+-]/g, "");
@@ -55,7 +54,7 @@ const CategorySchema = new Schema(
 function getRelPathOfURIPath(uriPath, sep = "-") {
   if (!uriPath) return uriPath;
   const lastSepPos = uriPath.lastIndexOf(sep);
-  if (lastSepPos === -1) return uriPath;
+  if (lastSepPos === -1) return "";
   return uriPath.slice(0, lastSepPos);
 }
 
@@ -78,6 +77,8 @@ CategorySchema.virtual("kind").get(() => 0);
 CategorySchema.virtual("solved").get(() => true);
 CategorySchema.virtual("uriPath")
   .get(function () {
+    if (this.relPath.indexOf('-') === -1)
+      return this.uriName;
     return this.relPath + "-" + this.uriName;
   })
   .set(function (uriPath) {
@@ -91,7 +92,7 @@ CategorySchema.virtual("progress").get(function () {
   return [0, 50];
 });
 
-CategorySchema.index({ relPath: 1, uriName: 1 });
+// CategorySchema.index({ relPath: 1, uriName: 1 });
 
 
 CategorySchema.pre('deleteOne', {document: true, query: false}, async function () {

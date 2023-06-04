@@ -49,7 +49,8 @@ export function AuthProvider({ children, apiClient }) {
       if ("email" in res.data) newIdentity.email = res.data.email;
       if ("id" in res.data) newIdentity.id = res.data.id;
 
-      setIdentity({ ...identity, ...newIdentity });
+      if (newIdentity?.univID || newIdentity?.email || newIdentity?.id)
+        setIdentity({ ...identity, ...newIdentity });
       return res;
     },
     (err) => {
@@ -61,7 +62,8 @@ export function AuthProvider({ children, apiClient }) {
         if ("email" in err.data) newIdentity.email = err.data.email;
         if ("id" in err.data) newIdentity.id = err.data.id;
   
-        setIdentity({ ...identity, ...newIdentity });
+        if (newIdentity?.univID || newIdentity?.email || newIdentity?.id)
+          setIdentity({ ...identity, ...newIdentity });
         return err;
       }
       return err;

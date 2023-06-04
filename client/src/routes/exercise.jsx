@@ -66,16 +66,17 @@ function QuestionCard({ question, index }) {
 }
 
 export default function ExercisePage() {
-  const currentInfo = useLoaderData();
-  const [setBreadcrumbs, ] = useOutletContext();
+  const details = useLoaderData();
+  const path = details?.path ?? "";
 
-  const currentInfoDummy = {
+  console.log("details are", details);
+
+/*   const details = {
     kind: 1, // 0 for catgs, 1 for exercises
     path: "memory-pointers/", // object path, from root supercategory /.
     solved: false,
-    progress: 4 /*
-    kind==0 then between 0 and exercises.length -1
-    */,
+    progress: 4
+    ,
 
     // Exercises specific infos:
     questions: [
@@ -205,10 +206,10 @@ export default function ExercisePage() {
     nbAttempts: 0,
     lastAttemptDate: "2023-05-14",
   };
-
+ */
   const handleClickSidebar = (e, idx) => {
     console.log("click sidebar on", idx);
-    if (0 <= idx && idx < currentInfoDummy.questions.length) {
+    if (0 <= idx && idx < details.questions.length) {
       const target = `q-${idx}`;
       const element = document.getElementById(target);
       if (element) element.scrollIntoView({ behavior: "smooth" });
@@ -228,7 +229,7 @@ export default function ExercisePage() {
         flexDirection='column'
         alignItems='center'
         gap='70px'>
-        {currentInfoDummy.questions.map((q, idx) => {
+        {details.questions.map((q, idx) => {
           return (
             <QuestionCard
               key={q.id}
@@ -264,7 +265,7 @@ export default function ExercisePage() {
             onClick={handleClickSidebar}
             makeText={(v, idx) => `Question ${idx + 1}`}
             makeTarget={(v, idx) => `#q-${idx}`}
-            content={currentInfoDummy.questions}
+            content={details.questions}
             disableRouting={true}
           />
         </Sidebar>

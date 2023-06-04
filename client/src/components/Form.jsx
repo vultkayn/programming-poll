@@ -4,7 +4,6 @@ import { Box } from "@mui/material";
 import FormBase from "./FormBase";
 
 export default function Form({
-  vertical = false,
   method,
   endpoint,
   children,
@@ -13,6 +12,7 @@ export default function Form({
   onSubmit = null,
   onError = null,
   toApi = true,
+  sx = {},
   BoxProps,
 }) {
   const boxProps = {
@@ -35,6 +35,7 @@ export default function Form({
       onChange={onChange}
       endpoint={endpoint}
       method={method}
+      sx={sx}
       { ...boxProps}>
       {children}
     </Box>
