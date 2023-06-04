@@ -22,7 +22,7 @@ function preparePathForPOST({ path, name, kind }) {
         : path.length;
     return path
       .slice(pathBeg, pathEnd)
-      .replaceAll(/[^a-zA-Z0-9-_/]/g, "")
+      .replaceAll(/[^a-zA-Z0-9-+_/]/g, "")
       .replaceAll("-", "_")
       .replaceAll("/", "-");
   };
