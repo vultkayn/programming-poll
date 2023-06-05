@@ -5,7 +5,6 @@ import {
   CardContent,
   Typography,
   FormControl,
-  Container,
   Button,
 } from "@mui/material";
 import Sidebar, { SidebarListing, makeSolvedIcon } from "../components/Sidebar";
@@ -66,12 +65,10 @@ function QuestionCard({ question, index }) {
 }
 
 export default function ExercisePage() {
-  const details = useLoaderData();
-  const path = details?.path ?? "";
+  // const details = useLoaderData();
 
-  console.log("details are", details);
 
-/*   const details = {
+const details = {
     kind: 1, // 0 for catgs, 1 for exercises
     path: "memory-pointers/", // object path, from root supercategory /.
     solved: false,
@@ -206,7 +203,9 @@ export default function ExercisePage() {
     nbAttempts: 0,
     lastAttemptDate: "2023-05-14",
   };
- */
+
+  const path = details?.path ?? "";
+  console.log("details are", details);
   const handleClickSidebar = (e, idx) => {
     console.log("click sidebar on", idx);
     if (0 <= idx && idx < details.questions.length) {

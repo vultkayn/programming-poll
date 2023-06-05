@@ -70,7 +70,68 @@ export default function CategoriesListingPage() {
     },
   ]); */
 
-  console.log("sections are", sections);
+
+  const sectionsDummy = [
+    {
+      title: "Exercises",
+      listing: [
+        {
+          path: "memory-pointers/exo1",
+          name: "Exercise 1",
+          solved: false,
+          kind: 1,
+        },
+        {
+          path: "memory-pointers/exercise-2",
+          name: "Exercise 2",
+          solved: true,
+          kind: 1,
+        },
+        { path: "pointers/exo3", name: "exo3", solved: false, kind: 1 },
+        { path: "memory/exo4", name: "exo4", solved: true, kind: 1 },
+        { path: "c++/exo12", name: "exo12", solved: false, kind: 1 },
+        { path: "memory/exercise5", name: "exercise5", solved: false, kind: 1 },
+        { path: "memory/exo5", name: "exo5", solved: false, kind: 1 },
+        {
+          path: "garbage_collector/exo46",
+          name: "exo46",
+          solved: false,
+          kind: 1,
+        },
+        { path: "oop/exo6", name: "exo6", solved: false, kind: 1 },
+      ],
+    },
+    {
+      title: "Subcategories",
+      listing: [
+        { path: "pointers", name: "pointers", solved: false, kind: 0 }, // FIXME path should include name too, fix above in the functions too
+        { path: "memory", name: "memory", solved: false, kind: 0 },
+        { path: "oop", name: "oop", solved: true, kind: 0 },
+        {
+          path: "garbage_collector",
+          name: "garbage collector",
+          solved: false,
+          kind: 0,
+        },
+        { path: "c", name: "c", solved: false, kind: 0 },
+        { path: "c++", name: "c++", solved: false, kind: 0 },
+        { path: "c++-types", name: "types", solved: true, kind: 0 },
+        { path: "pointers", name: "pointers", solved: false, kind: 0 },
+        { path: "memory", name: "memory", solved: false, kind: 0 },
+        { path: "oop", name: "oop", solved: false, kind: 0 },
+        {
+          path: "garbage_collector",
+          name: "garbage collector",
+          solved: false,
+          kind: 0,
+        },
+        { path: "c2", name: "c", solved: false, kind: 0 },
+        { path: "c++2", name: "c++", solved: false, kind: 0 },
+        { path: "types2", name: "types", solved: false, kind: 0 },
+      ],
+    },
+  ];
+
   if (sections.length === 0)
     setSections([{ title: "Subcategories", listing: [] }]);
   if (!isIndex && sections.length === 1 && sections[0].title !== "Exercises")
@@ -98,7 +159,7 @@ export default function CategoriesListingPage() {
                 makeIcon={makeSolvedIcon}
                 makeTarget={(v) => v.path}
                 inset
-                canAdd={!isIndex}
+                canAdd={section.title === "Subcategories" || !isIndex}
                 addTarget={section.title === "Subcategories" ? "/practice/@new" : `/practice/${current.path}/@new`}
               />
             );
